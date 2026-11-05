@@ -278,9 +278,12 @@ final class TLUnityUIView: UIView, UIKeyInput {
         // Splits and the asset pack are part of the app, whatever its engine; the game's libraries and data may be in any of
         // them (a Google Play install keeps a Unity game's libraries in one split and its data in an asset pack).
         JITLess.prepareLaunch()
+        // The native linker needs executable memory. Unlike QEMU's launch path,
+        // the game path must claim its region itself before any .so is mapped.
+        let executableMemoryReady = JITLess.enabled || JITBootstrap.prewarm()
         let angleAvailable = FileManager.default.fileExists(atPath: angle)
         let mapJITState = JITBootstrap.mapJITResult.map { $0 ? "yes" : "no" } ?? "not probed"
-        HuskLog.log("tl", "preflight: engine=\(engine), JIT-less=\(JITLess.enabled), debugger=\(JITBootstrap.isDebuggerAttached), JIT-region=\(JITBootstrap.isLive), MAP_JIT=\(mapJITState), ANGLE=\(angleAvailable)")
+        HuskLog.log("tl", "preflight: engine=\(engine), JIT-less=\(JITLess.enabled), executable-memory=\(executableMemoryReady), debugger=\(JITBootstrap.isDebuggerAttached), JIT-region=\(JITBootstrap.isLive), MAP_JIT=\(mapJITState), ANGLE=\(angleAvailable)")
         if !angleAvailable && engine != .ue4 {
             HuskLog.log("tl", "preflight warning: libANGLE-shared.dylib is missing; GLES-based engines may refuse to start")
         }
@@ -294,7 +297,11 @@ final class TLUnityUIView: UIView, UIKeyInput {
         }
         husk_native_set_extra_fonts(CJKFonts.directory.path)
         let started: Bool
-        switch engine {
+        if !executableMemoryReady {
+            HuskLog.log("tl", "native: launch blocked — executable memory is unavailable. Enable JIT with StikDebug or Built-in StikJIT, then retry.")
+            started = false
+        } else {
+            switch engine {
         case .sdl:
             // The notch and the rounded corners, in the surface's pixels: the game keeps its controls out of them.
             if let inset = windowed ? UIEdgeInsets.zero : window?.safeAreaInsets {
@@ -351,6 +358,7 @@ final class TLUnityUIView: UIView, UIKeyInput {
             started = husk_flutter_launch(apk, dataDir, layerPtr, Int32(width), Int32(height), angle, ca)
         case .minecraft: started = husk_gameactivity_launch(apk, dataDir, layerPtr, Int32(width), Int32(height), angle, ca)
         case .unity: started = husk_unity_launch(apk, dataDir, layerPtr, Int32(width), Int32(height), angle, ca)
+            }
         }
         if !started { HuskLog.log("tl", "native: launch refused") }
     }
