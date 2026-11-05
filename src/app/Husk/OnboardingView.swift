@@ -128,7 +128,7 @@ struct OnboardingView: View {
             if step != .ask {
                 VStack(spacing: 14) {
                     dots
-                    Button(step == .tour && tourPage == Self.tour.count - 1 ? "Start Using Husk" : "Continue") { next() }
+                    Button(step == .tour && tourPage == Self.tour.count - 1 ? "Start Using Stride" : "Continue") { next() }
                         .buttonStyle(PrimaryButtonStyle())
                 }
                 .padding(.horizontal, 28)
@@ -240,7 +240,7 @@ struct OnboardingView: View {
         VStack(spacing: 18) {
             Spacer()
             HuskMark(size: 110)
-            Text("Welcome to Husk")
+            Text("Welcome to Stride")
                 .font(.system(size: 34, weight: .bold))
             Text("Android and PS4 games, on your iPhone.")
                 .font(.title3).foregroundStyle(.secondary)
@@ -395,7 +395,7 @@ struct OnboardingView: View {
                         }
                     }
                     .foregroundStyle(Theme.accent)
-                    Text("Import the certificate SideStore or AltStore installed Husk with, or a .p12.")
+                    Text("Import the certificate SideStore or AltStore installed Stride with, or a .p12.")
                         .font(.caption).foregroundStyle(.secondary)
                     if let info = certificate.info {
                         Text("Certificate: team \(info.teamID).")
@@ -428,7 +428,7 @@ struct OnboardingView: View {
                 }
                 .padding(.horizontal, 28)
 
-                Text("You can skip this: Husk asks again when a game needs it. JIT is in Settings › JIT & Sideload, Play without JIT is next to it.")
+                Text("You can skip this: Stride asks again when a game needs it. JIT is in Settings › JIT & Sideload, Play without JIT is next to it.")
                     .font(.footnote).foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 36)
