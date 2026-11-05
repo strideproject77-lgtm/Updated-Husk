@@ -255,12 +255,19 @@ static bool open_path(const char *path)
     size_t l = strlen(path);
     if (l > 4 && !strcmp(path + l - 4, ".dex")) {
         FILE *f = fopen(path, "rb");
-        if (!f) return false;
-        fseek(f, 0, SEEK_END); long n = ftell(f); fseek(f, 0, SEEK_SET);
+        if (!f) { tl_log_line("dvm: cannot open DEX %s", path); return false; }
+        if (fseek(f, 0, SEEK_END) != 0) { fclose(f); return false; }
+        long n = ftell(f);
+        if (n <= 0 || (uint64_t)n > UINT32_MAX || fseek(f, 0, SEEK_SET) != 0) {
+            fclose(f); tl_log_line("dvm: invalid DEX file size for %s", path); return false;
+        }
         uint8_t *b = malloc((size_t)n);
-        bool ok = fread(b, 1, (size_t)n, f) == (size_t)n;
+        if (!b) { fclose(f); tl_log_line("dvm: out of memory reading %s", path); return false; }
+        bool read_ok = fread(b, 1, (size_t)n, f) == (size_t)n;
         fclose(f);
-        return ok && dex_add(b, (size_t)n, path);
+        if (!read_ok) { free(b); tl_log_line("dvm: short read while loading %s", path); return false; }
+        if (!dex_add(b, (size_t)n, path)) { free(b); return false; }
+        return true;
     }
     tl_zip z; char err[160];
     if (!tl_zip_open(&z, path, err, sizeof(err))) { tl_log_line("dvm: %s: %s", path, err); return false; }
@@ -275,13 +282,26 @@ static bool open_path(const char *path)
         /* A boot jar's stored dex (framework.jar's are 44 MB) is read where the jar is mapped: clean pages the system can drop,
            not a copy that counts against the phone's memory limit. Boot dexes live as long as the process; the app's are
            copied, since dropping an app frees them. */
-        const uint8_t *copy;
-        if (!owned && g_nboot_dex < 0) { copy = data; mapped = true; }
-        else { uint8_t *c = malloc(len); memcpy(c, data, len); if (owned) free((void *)data); copy = c; }
+        const uint8_t *copy = data;
+        bool copied = false;
+        if (!owned && g_nboot_dex < 0) {
+            mapped = true;       /* keep the boot-jar mapping alive: DEX pointers refer into it */
+        } else {
+            uint8_t *c = malloc(len);
+            if (!c) {
+                if (owned) free((void *)data);
+                tl_log_line("dvm: out of memory copying %s from %s", name, path);
+                continue;
+            }
+            memcpy(c, data, len);
+            if (owned) free((void *)data);
+            copy = c; copied = true;
+        }
         char label[96];
         const char *slash = strrchr(path, '/');
         snprintf(label, sizeof(label), "%s!%s", slash ? slash + 1 : path, name);
-        any |= dex_add(copy, len, label);
+        if (dex_add(copy, len, label)) any = true;
+        else if (copied) free((void *)copy);
     }
     if (!mapped) tl_zip_close(&z);          /* else the mapping stays: the dexes above point into it */
     return any;
