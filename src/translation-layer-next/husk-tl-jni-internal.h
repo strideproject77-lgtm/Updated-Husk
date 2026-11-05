@@ -15,7 +15,7 @@ typedef struct tl_jmeth {
     char *name, *sig;
     bool is_static;
     tl_jhle_fn fn;                     /* NULL: no implementation */
-    char argk[40];                     /* one kind letter per argument: Z B C S I J F D L */
+    char argk[256];                     /* one kind letter per argument: Z B C S I J F D L */
     int nargs;
     char retk;                         /* kind of the return value, or V */
     bool exists;                       /* declared by something we can see */
