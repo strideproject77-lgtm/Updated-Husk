@@ -14,6 +14,8 @@
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <fcntl.h>
+#include <limits.h>
+#include <stdint.h>
 #include <pthread.h>
 #include <stdatomic.h>
 #include <stdio.h>
