@@ -533,6 +533,10 @@ static jvalue g_zero;
 
 static jvalue invoke(jobj *self, tl_jmeth *m, bool nonvirtual, const jvalue *args)
 {
+    if (!m) {
+        tl_jni_throw("java/lang/NoSuchMethodError", "attempted to invoke an unresolved JNI method");
+        return g_zero;
+    }
     /* A host implementation wins over the APK's bytecode: Subway's AnalyticsBridge.SetupWorkerForAppClosed
      * is in the DEX and throws if WorkManager is missing. */
     tl_jcall c = { .self = self, .cls = m->cls, .args = args };
@@ -785,13 +789,16 @@ static jo jni_GetObjectClass(void *env, jo o)
 
 static void *jni_GetMethodID_impl(jo cls, const char *name, const char *sig, bool is_static)
 {
-    if (!cls || cls->kind != TL_K_CLASS) {
-        tl_log_line("jni: Get%sMethodID(NULL class, %s%s)", is_static ? "Static" : "", name, sig);
-        tl_jni_throw("java/lang/NullPointerException", "class is null");
+    if (!cls || cls->kind != TL_K_CLASS || !name || !sig || !*name || !*sig) {
+        tl_jni_throw("java/lang/NullPointerException", "GetMethodID requires a class, method name, and signature");
         return NULL;
     }
     if (!ensure_class_initialized(cls->klass.jc)) return NULL;
     tl_jmeth *m = lookup_method(cls->klass.jc, name, sig, is_static);
+    if (!m) {
+        tl_jni_throw("java/lang/OutOfMemoryError", "unable to allocate JNI method metadata");
+        return NULL;
+    }
     TRACE("jni: Get%sMethodID(%s, %s%s) -> %s", is_static ? "Static" : "", cls->klass.jc->name, name, sig,
           m->fn ? "implemented" : m->exists ? "exists, not implemented" : "NOT FOUND");
     if (!m->exists) {
