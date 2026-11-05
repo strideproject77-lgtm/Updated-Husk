@@ -50,10 +50,10 @@ echo "==> libepoxy"
   git checkout -q -- src/dispatch_common.c 2>/dev/null || true
   patch -p1 --silent < "$HUSK_ROOT/patches/husk-epoxy-ios-egl-path.patch"
   rm -rf _build
-  $MESON setup _build --cross-file "$HUSK_ROOT/build/ios-arm64/cross-ios.meson" \
+  "$MESON" setup _build --cross-file "$HUSK_ROOT/build/ios-arm64/cross-ios.meson" \
       --prefix "$PREFIX" --default-library=static \
       -Dtests=false -Dglx=no -Degl=yes -Dx11=false
-  $NINJA -C _build install ) > "$LOGS/epoxy.log" 2>&1 \
+  "$NINJA" -C _build install ) > "$LOGS/epoxy.log" 2>&1 \
   || { echo "epoxy failed:" >&2; grep -a "error:\|FAILED:" "$LOGS/epoxy.log" | head -10 >&2; exit 1; }
 echo "    $(ls -lh "$PREFIX/lib/libepoxy.a" | awk '{print $5}')"
 
