@@ -8,7 +8,7 @@
 #
 # Usage: ./scripts/build_ios.sh [stage ...]      (no args = all stages)
 #        stages: libffi glib pixman libucontext libslirp qemu
-set -uo pipefail
+set -euo pipefail
 
 HUSK_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SRC="$HUSK_ROOT/third_party/build"
@@ -224,7 +224,7 @@ stage_qemurebuild() {
 # break the app target.
 husk_stage_dylib() {
     local src="$SRC/qemu-10.0.12-utm/_husk_build/libqemu-aarch64-softmmu.dylib"
-    [ -f "$src" ] || return 0
+    [ -f "$src" ] || { echo "QEMU shared library missing: $src" >&2; return 1; }
     mkdir -p "$PREFIX/../lib"
     cp "$src" "$PREFIX/../lib/"
     echo "[stage] $(cd "$PREFIX/../lib" && pwd)/libqemu-aarch64-softmmu.dylib"
