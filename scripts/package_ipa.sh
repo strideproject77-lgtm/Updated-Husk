@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build Husk and package one IPA for every installer, validating the bundle before shipping it.
+# Build Stride and package one IPA for every installer, validating the bundle before shipping it.
 #
 # No signing team is needed: AltStore / SideStore re-sign at install with the
 # user's own profile. The IPA is signed ad hoc with Husk.entitlements embedded
@@ -31,7 +31,7 @@ for arg in "$@"; do
 done
 [[ "$OUT" == *.tipa ]] && TROLLSTORE=true
 if [ -z "$OUT" ]; then
-    OUT="$HOME/Desktop/Husk.$([ "$TROLLSTORE" = true ] && echo tipa || echo ipa)"
+    OUT="$HOME/Desktop/Stride.$([ "$TROLLSTORE" = true ] && echo tipa || echo ipa)"
 fi
 mkdir -p "$DD"
 
