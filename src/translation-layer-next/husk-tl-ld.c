@@ -188,7 +188,21 @@ void tl_ld_on_init(void (*fn)(tl_lib *lib)) { g_on_init = fn; }
 
 /* The image's bytes at `vaddr`: through the writable view, which for a mixed page is its copy (the dylib's own page there is the
  * unrelocated, executable one). */
-static inline const void *at(const tl_lib *L, uint64_t vaddr) { return waddr(L, vaddr - L->base_vaddr); }
+static inline bool image_range(const tl_lib *L, uint64_t vaddr, uint64_t bytes)
+{
+    if (!L || vaddr < L->base_vaddr) return false;
+    uint64_t off = vaddr - L->base_vaddr, size = (uint64_t)L->npages * PAGE;
+    return off <= size && bytes <= size - off;
+}
+static inline const void *at(const tl_lib *L, uint64_t vaddr)
+{
+    return image_range(L, vaddr, 1) ? waddr(L, vaddr - L->base_vaddr) : NULL;
+}
+static bool dynstr_valid(const tl_lib *L, uint64_t off)
+{
+    if (!L->strtab || !L->strsz || off >= L->strsz || !image_range(L, L->strtab, L->strsz)) return false;
+    return memchr(at(L, L->strtab) + off, 0, (size_t)(L->strsz - off)) != NULL;
+}
 
 /* ------------------------------------------------------------- the APKs */
 
@@ -413,11 +427,14 @@ static uint32_t sysv_hash(const char *s)
 
 static const char *sym_name(const tl_lib *L, const elf_sym *s)
 {
+    if (!s || !dynstr_valid(L, s->st_name)) return "";
     return (const char *)at(L, L->strtab) + s->st_name;
 }
 
 static const elf_sym *sym_at(const tl_lib *L, uint32_t i)
 {
+    uint64_t off = (uint64_t)i * sizeof(elf_sym);
+    if (!L->symtab || !image_range(L, L->symtab, off + sizeof(elf_sym))) return NULL;
     return (const elf_sym *)at(L, L->symtab) + i;
 }
 
@@ -454,7 +471,7 @@ static const elf_sym *lib_find(const tl_lib *L, const char *name)
             uint32_t c = chains[i - symoff];
             if ((h | 1) == (c | 1)) {
                 const elf_sym *s = sym_at(L, i);
-                if (s->st_shndx != SHN_UNDEF_ && !strcmp(sym_name(L, s), name)) return s;
+                if (s && s->st_shndx != SHN_UNDEF_ && !strcmp(sym_name(L, s), name)) return s;
             }
             if (c & 1) break;
         }
@@ -466,7 +483,7 @@ static const elf_sym *lib_find(const tl_lib *L, const char *name)
         if (!nb) return NULL;
         for (uint32_t i = t[2 + sysv_hash(name) % nb]; i && i < nc; i = t[2 + nb + i]) {
             const elf_sym *s = sym_at(L, i);
-            if (s->st_shndx != SHN_UNDEF_ && !strcmp(sym_name(L, s), name)) return s;
+            if (s && s->st_shndx != SHN_UNDEF_ && !strcmp(sym_name(L, s), name)) return s;
         }
     }
     return NULL;
@@ -474,18 +491,30 @@ static const elf_sym *lib_find(const tl_lib *L, const char *name)
 
 static uint32_t count_dynsyms(const tl_lib *L)
 {
-    if (L->sysv_hash) return ((const uint32_t *)at(L, L->sysv_hash))[1];
-    if (!L->gnu_hash) return 0;
+    if (L->sysv_hash) {
+        if (!image_range(L, L->sysv_hash, 8)) return 0;
+        const uint32_t *h = at(L, L->sysv_hash);
+        uint64_t words = 2ull + h[0] + h[1];
+        if (!image_range(L, L->sysv_hash, words * 4)) return 0;
+        return h[1];
+    }
+    if (!L->gnu_hash || !image_range(L, L->gnu_hash, 16)) return 0;
     const uint8_t *g = at(L, L->gnu_hash);
     uint32_t nb, symoff, bloom_n;
     memcpy(&nb, g, 4); memcpy(&symoff, g + 4, 4); memcpy(&bloom_n, g + 8, 4);
+    uint64_t head = 16ull + (uint64_t)bloom_n * 8 + (uint64_t)nb * 4;
+    if (!nb || !image_range(L, L->gnu_hash, head)) return 0;
     const uint32_t *buckets = (const uint32_t *)(g + 16 + (size_t)bloom_n * 8);
-    const uint32_t *chains = buckets + nb;
     uint32_t last = 0;
     for (uint32_t i = 0; i < nb; i++) if (buckets[i] > last) last = buckets[i];
     if (last < symoff) return symoff;
-    while (!(chains[last - symoff] & 1)) last++;
-    return last + 1;
+    uint64_t max_chains = ((uint64_t)L->npages * PAGE - (L->gnu_hash - L->base_vaddr) - head) / 4;
+    uint64_t idx = (uint64_t)last - symoff;
+    if (idx >= max_chains) return 0;
+    const uint32_t *chains = (const uint32_t *)(g + head);
+    while (idx < max_chains && !(chains[idx] & 1)) idx++;
+    if (idx >= max_chains || (uint64_t)symoff + idx + 1 > UINT32_MAX) return 0;
+    return symoff + (uint32_t)idx + 1;
 }
 
 /*
@@ -1820,7 +1849,9 @@ static uint64_t bind_symbol(tl_lib *L, uint32_t symidx, bool *failed)
     bool cached = L->symcache && symidx < L->ncache;
     if (cached && L->symcache[symidx]) return L->symcache[symidx];
     const elf_sym *s = sym_at(L, symidx);
+    if (!s) { *failed = true; tl_log_line("ld: %s: symbol index %u is outside its image", L->name, symidx); return 0; }
     const char *name = sym_name(L, s);
+    if (!name[0]) { *failed = true; tl_log_line("ld: %s: symbol %u has an invalid string-table offset", L->name, symidx); return 0; }
     uint64_t val = 0;
     if (s->st_shndx != SHN_UNDEF_ && (s->st_info >> 4) != STB_WEAK_) {
         /* Defined here. Search the scope anyway so an earlier library's definition
@@ -1861,8 +1892,8 @@ static void reloc_both(tl_lib *L, uint64_t off, size_t bytes)
 
 static bool reloc_one_into(tl_lib *L, uint64_t r_offset, uint32_t type, uint32_t symidx, int64_t addend)
 {
+    if (r_offset < L->base_vaddr || !image_range(L, r_offset, 8)) return false;
     uint64_t off = r_offset - L->base_vaddr;
-    if (off + 8 > L->npages * PAGE) return false;
     /* An imported dylib maps a code page read-only (it is signed and executable). Nothing writes there: the JIT region's views are one
      * memory, but a dylib's are not, so a relocation that names a code page stays as the .so has it. A page that shares its data with
      * code is not code on the data half: it has a writable copy, and the relocation goes there. */
@@ -1903,7 +1934,7 @@ static bool reloc_one_into(tl_lib *L, uint64_t r_offset, uint32_t type, uint32_t
         }
         if (!L->tls_id) { tl_log_line("ld: %s: a TLS relocation but no TLS segment", L->name); return false; }
         if (type == R_TLSDESC) {
-            if (off + 16 > L->npages * PAGE) return false;
+            if (!image_range(L, r_offset, 16)) return false;
             place[0] = (uint64_t)(uintptr_t)&tl_tlsdesc_entry;
             place[1] = ((uint64_t)L->tls_id << 32) | (uint32_t)(symoff + (uint64_t)addend);
         } else if (type == R_TLS_DTPMOD) {
