@@ -45,6 +45,102 @@ static int32_t sleb(const uint8_t **pp)
     *pp = p; return r;
 }
 
+/* Reject truncated or inconsistent DEX metadata before any table offset is dereferenced. */
+static bool dex_range(size_t size, uint32_t off, uint32_t count, size_t stride)
+{
+    if (!count) return off == 0 || off <= size;
+    if (!off || off > size || stride > SIZE_MAX / count) return false;
+    return (size_t)count * stride <= size - off;
+}
+
+static bool dex_uleb_checked(const uint8_t *b, size_t size, uint32_t off, size_t *end)
+{
+    if (off >= size) return false;
+    size_t p = off;
+    for (int i = 0; i < 5; i++) {
+        if (p >= size) return false;
+        uint8_t v = b[p++];
+        if (!(v & 0x80)) { *end = p; return true; }
+        if (i == 4) return false;
+    }
+    return false;
+}
+
+static bool dex_validate(const uint8_t *b, size_t size, const char *label)
+{
+    if (!b || size < 0x70 || size > UINT32_MAX || memcmp(b, "dex\n", 4) ||
+        b[4] < '0' || b[4] > '9' || b[5] < '0' || b[5] > '9' || b[6] < '0' || b[6] > '9' || b[7] != 0) {
+        tl_log_line("dvm: %s has an invalid DEX header", label); return false;
+    }
+    uint32_t file_size = rd32(b + 0x20), header_size = rd32(b + 0x24), endian = rd32(b + 0x28);
+    uint32_t link_size = rd32(b + 0x2c), link_off = rd32(b + 0x30), map_off = rd32(b + 0x34);
+    uint32_t ns = rd32(b + 0x38), so = rd32(b + 0x3c), nt = rd32(b + 0x40), to = rd32(b + 0x44);
+    uint32_t np = rd32(b + 0x48), po = rd32(b + 0x4c), nf = rd32(b + 0x50), fo = rd32(b + 0x54);
+    uint32_t nm = rd32(b + 0x58), mo = rd32(b + 0x5c), nc = rd32(b + 0x60), co = rd32(b + 0x64);
+    uint32_t data_size = rd32(b + 0x68), data_off = rd32(b + 0x6c);
+    if (file_size != size || header_size != 0x70 || endian != 0x12345678u ||
+        (link_size && !dex_range(size, link_off, link_size, 1)) || (!link_size && link_off) ||
+        (map_off && !dex_range(size, map_off, 1, 4)) ||
+        (data_size && (!data_off || data_off > size || data_size > size - data_off)) || (!data_size && data_off) ||
+        !dex_range(size, so, ns, 4) || !dex_range(size, to, nt, 4) ||
+        !dex_range(size, po, np, 12) || !dex_range(size, fo, nf, 8) ||
+        !dex_range(size, mo, nm, 8) || !dex_range(size, co, nc, 32)) {
+        tl_log_line("dvm: %s has invalid DEX section bounds/header fields", label); return false;
+    }
+    for (uint32_t i = 0; i < ns; i++) {
+        uint32_t off = rd32(b + so + 4u * i); size_t p;
+        if (!dex_uleb_checked(b, size, off, &p)) {
+            tl_log_line("dvm: %s has an invalid string_data offset at index %u", label, i); return false;
+        }
+        while (p < size && b[p]) p++;
+        if (p == size) { tl_log_line("dvm: %s has an unterminated DEX string at index %u", label, i); return false; }
+    }
+    for (uint32_t i = 0; i < nt; i++) if (rd32(b + to + 4u * i) >= ns) {
+        tl_log_line("dvm: %s has an invalid type_id string index", label); return false;
+    }
+    for (uint32_t i = 0; i < np; i++) {
+        const uint8_t *p = b + po + 12u * i;
+        uint32_t shorty = rd32(p), ret = rd32(p + 4), params = rd32(p + 8);
+        if (shorty >= ns || ret >= nt) { tl_log_line("dvm: %s has an invalid proto_id", label); return false; }
+        if (params) {
+            if (!dex_range(size, params, 1, 4)) { tl_log_line("dvm: %s has an invalid proto parameter list", label); return false; }
+            uint32_t n = rd32(b + params);
+            if (!dex_range(size, params + 4, n, 2)) { tl_log_line("dvm: %s has truncated proto parameters", label); return false; }
+            for (uint32_t j = 0; j < n; j++) if (rd16(b + params + 4 + 2u * j) >= nt) {
+                tl_log_line("dvm: %s has an invalid proto parameter type", label); return false;
+            }
+        }
+    }
+    for (uint32_t i = 0; i < nf; i++) {
+        const uint8_t *p = b + fo + 8u * i;
+        if (rd16(p) >= nt || rd16(p + 2) >= nt || rd32(p + 4) >= ns) {
+            tl_log_line("dvm: %s has an invalid field_id", label); return false;
+        }
+    }
+    for (uint32_t i = 0; i < nm; i++) {
+        const uint8_t *p = b + mo + 8u * i;
+        if (rd16(p) >= nt || rd16(p + 2) >= np || rd32(p + 4) >= ns) {
+            tl_log_line("dvm: %s has an invalid method_id", label); return false;
+        }
+    }
+    for (uint32_t i = 0; i < nc; i++) {
+        const uint8_t *p = b + co + 32u * i;
+        uint32_t cls = rd32(p), super = rd32(p + 8), source = rd32(p + 16), interfaces = rd32(p + 12);
+        if (cls >= nt || (super != UINT32_MAX && super >= nt) || (source != UINT32_MAX && source >= ns)) {
+            tl_log_line("dvm: %s has an invalid class_def", label); return false;
+        }
+        if (interfaces) {
+            if (!dex_range(size, interfaces, 1, 4)) { tl_log_line("dvm: %s has an invalid interface list", label); return false; }
+            uint32_t n = rd32(b + interfaces);
+            if (!dex_range(size, interfaces + 4, n, 2)) { tl_log_line("dvm: %s has truncated interfaces", label); return false; }
+            for (uint32_t j = 0; j < n; j++) if (rd16(b + interfaces + 4 + 2u * j) >= nt) {
+                tl_log_line("dvm: %s has an invalid interface type", label); return false;
+            }
+        }
+    }
+    return true;
+}
+
 static const char *dex_str(const dvm_dex *d, uint32_t idx)
 {
     if (idx >= d->nstr) return "";
@@ -106,8 +202,8 @@ static cdef *cdef_find(const char *name)
 
 static bool dex_add(const uint8_t *b, size_t size, const char *label)
 {
-    if (size < 0x70 || memcmp(b, "dex\n", 4)) { tl_log_line("dvm: %s is not a DEX file", label); return false; }
-    if (g_ndex >= 256) return false;
+    if (!dex_validate(b, size, label)) return false;
+    if (g_ndex >= 256) { tl_log_line("dvm: DEX limit reached while loading %s", label); return false; }
     dvm_dex *d = calloc(1, sizeof(*d));
     d->b = b; d->size = size;
     d->nstr = rd32(b + 0x38); d->str_off = rd32(b + 0x3c);
@@ -120,6 +216,10 @@ static bool dex_add(const uint8_t *b, size_t size, const char *label)
     d->fcache = calloc(d->nfield ? d->nfield : 1, sizeof(*d->fcache));
     d->tcache = calloc(d->ntype ? d->ntype : 1, sizeof(*d->tcache));
     d->scache = calloc(d->nstr ? d->nstr : 1, sizeof(*d->scache));
+    if (!d->mcache || !d->fcache || !d->tcache || !d->scache) {
+        free(d->mcache); free(d->fcache); free(d->tcache); free(d->scache); free(d);
+        tl_log_line("dvm: out of memory allocating DEX indexes for %s", label); return false;
+    }
     snprintf(d->name, sizeof(d->name), "%s", label);
     d->ns = g_add_ns;
     int added = 0;
