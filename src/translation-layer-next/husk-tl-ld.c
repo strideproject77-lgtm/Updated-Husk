@@ -784,7 +784,8 @@ const char *tl_ld_symbol_at(const void *addr, const char **lib_name, const void 
     uint32_t n = L->nsyms;
     for (uint32_t i = 1; i < n; i++) {
         const elf_sym *s = sym_at(L, i);
-        if (s->st_shndx == SHN_UNDEF_ || !s->st_value) continue;
+        if (!s || s->st_shndx == SHN_UNDEF_ || !s->st_value || s->st_value < L->base_vaddr ||
+            !image_range(L, s->st_value, s->st_size ? s->st_size : 1)) continue;
         uint64_t so = s->st_value - L->base_vaddr;
         if (so <= off && (!best || so > best->st_value - L->base_vaddr)) best = s;
     }
@@ -1949,6 +1950,7 @@ static bool reloc_one_into(tl_lib *L, uint64_t r_offset, uint32_t type, uint32_t
         uint64_t symoff = 0;
         if (symidx) {
             const elf_sym *ts = sym_at(L, symidx);
+            if (!ts) { tl_log_line("ld: %s: invalid TLS symbol index %u", L->name, symidx); return false; }
             if (ts->st_shndx == SHN_UNDEF_) { tl_log_line("ld: %s: a thread-local variable of another library (%s) is not supported", L->name, sym_name(L, ts)); return false; }
             symoff = ts->st_value;
         }
