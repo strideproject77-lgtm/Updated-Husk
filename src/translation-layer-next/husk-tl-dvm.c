@@ -80,7 +80,7 @@ static bool dex_validate(const uint8_t *b, size_t size, const char *label)
     uint32_t data_size = rd32(b + 0x68), data_off = rd32(b + 0x6c);
     if (file_size != size || header_size != 0x70 || endian != 0x12345678u ||
         (link_size && !dex_range(size, link_off, link_size, 1)) || (!link_size && link_off) ||
-        (map_off && !dex_range(size, map_off, 1, 4)) ||
+        (map_off && (map_off < data_off || !dex_range(size, map_off, 1, 4))) ||
         (data_size && (!data_off || data_off > size || data_size > size - data_off)) || (!data_size && data_off) ||
         !dex_range(size, so, ns, 4) || !dex_range(size, to, nt, 4) ||
         !dex_range(size, po, np, 12) || !dex_range(size, fo, nf, 8) ||
@@ -89,11 +89,11 @@ static bool dex_validate(const uint8_t *b, size_t size, const char *label)
     }
     for (uint32_t i = 0; i < ns; i++) {
         uint32_t off = rd32(b + so + 4u * i); size_t p;
-        if (!dex_uleb_checked(b, size, off, &p)) {
+        if (!data_size || off < data_off || off >= data_off + data_size || !dex_uleb_checked(b, size, off, &p)) {
             tl_log_line("dvm: %s has an invalid string_data offset at index %u", label, i); return false;
         }
-        while (p < size && b[p]) p++;
-        if (p == size) { tl_log_line("dvm: %s has an unterminated DEX string at index %u", label, i); return false; }
+        while (p < (size_t)data_off + data_size && b[p]) p++;
+        if (p == (size_t)data_off + data_size) { tl_log_line("dvm: %s has an unterminated DEX string at index %u", label, i); return false; }
     }
     for (uint32_t i = 0; i < nt; i++) if (rd32(b + to + 4u * i) >= ns) {
         tl_log_line("dvm: %s has an invalid type_id string index", label); return false;
@@ -103,9 +103,9 @@ static bool dex_validate(const uint8_t *b, size_t size, const char *label)
         uint32_t shorty = rd32(p), ret = rd32(p + 4), params = rd32(p + 8);
         if (shorty >= ns || ret >= nt) { tl_log_line("dvm: %s has an invalid proto_id", label); return false; }
         if (params) {
-            if (!dex_range(size, params, 1, 4)) { tl_log_line("dvm: %s has an invalid proto parameter list", label); return false; }
+            if (!data_size || params < data_off || params >= data_off + data_size || !dex_range(size, params, 1, 4)) { tl_log_line("dvm: %s has an invalid proto parameter list", label); return false; }
             uint32_t n = rd32(b + params);
-            if (!dex_range(size, params + 4, n, 2)) { tl_log_line("dvm: %s has truncated proto parameters", label); return false; }
+            if (!dex_range((size_t)data_off + data_size, params + 4, n, 2)) { tl_log_line("dvm: %s has truncated proto parameters", label); return false; }
             for (uint32_t j = 0; j < n; j++) if (rd16(b + params + 4 + 2u * j) >= nt) {
                 tl_log_line("dvm: %s has an invalid proto parameter type", label); return false;
             }
@@ -130,9 +130,9 @@ static bool dex_validate(const uint8_t *b, size_t size, const char *label)
             tl_log_line("dvm: %s has an invalid class_def", label); return false;
         }
         if (interfaces) {
-            if (!dex_range(size, interfaces, 1, 4)) { tl_log_line("dvm: %s has an invalid interface list", label); return false; }
+            if (!data_size || interfaces < data_off || interfaces >= data_off + data_size || !dex_range(size, interfaces, 1, 4)) { tl_log_line("dvm: %s has an invalid interface list", label); return false; }
             uint32_t n = rd32(b + interfaces);
-            if (!dex_range(size, interfaces + 4, n, 2)) { tl_log_line("dvm: %s has truncated interfaces", label); return false; }
+            if (!dex_range((size_t)data_off + data_size, interfaces + 4, n, 2)) { tl_log_line("dvm: %s has truncated interfaces", label); return false; }
             for (uint32_t j = 0; j < n; j++) if (rd16(b + interfaces + 4 + 2u * j) >= nt) {
                 tl_log_line("dvm: %s has an invalid interface type", label); return false;
             }
