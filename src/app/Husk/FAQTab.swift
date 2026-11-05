@@ -61,7 +61,7 @@ enum FAQ {
             Item(question: "What is JIT, and why does Husk need it?",
                  answer: "Android apps and games are compiled while they run, which needs memory that can be written and then run. "
                        + "iOS only allows that while a debugger is attached to the app. Turning on JIT attaches one for a moment. "
-                       + "Without it, Husk can show your library but cannot start Android or a game."),
+                       + "Without it, Stride can show your library but cannot start Android or a game."),
             Item(question: "Which way of turning on JIT should I use?",
                  answer: "• **iOS 27 or later:** Settings › JIT › Pair on this iPhone. No computer needed.\n"
                        + "• **iOS 26:** StikJIT (built in) with a pairing file made on a computer, plus LocalDevVPN.\n"
@@ -97,7 +97,7 @@ enum FAQ {
                        + "• **“Untrusted Developer”:** go to Settings › General › VPN & Device Management and trust your certificate.\n"
                        + "• **Asks for Developer Mode:** turn it on in Settings › Privacy & Security."),
             Item(question: "Husk closed while I was playing",
-                 answer: "When Husk opens again it shows what happened, with a report you can share. Usually the game ran out of memory "
+                 answer: "When Stride opens again it shows what happened, with a report you can share. Usually the game ran out of memory "
                        + "or hit something Husk does not support yet. Close other apps, and share the report if it keeps happening."),
             Item(question: "How do I get logs to report a problem?",
                  answer: "Open the app's page in your Library and tap **Share Report**. For Husk's own log, go to "
@@ -116,7 +116,7 @@ enum FAQ {
                        + "• **Protected app:** it checks that it is on a real Android phone, or uses anti-cheat or DRM. Husk does not get around these.\n"
                        + "• **Wrong kind of CPU code:** the APK only has x86 or another non-ARM architecture. Find an ARM (arm64-v8a or armeabi-v7a) version.\n"
                        + "• **Incomplete app or missing game data:** the APK needs its split files or an OBB. Import the full .apks, .xapk or .apkm.\n"
-                       + "• **Needs Google:** the app requires a Google account or Play services Husk cannot provide.\n"
+                       + "• **Needs Google:** the app requires a Google account or Play services Stride cannot provide.\n"
                        + "• **Uses something Husk does not have yet:** share the report so it can be added."),
             Item(question: "The screen stays black",
                  answer: "The first launch of a big game prepares its code and data, and can take up to a minute. "
@@ -150,7 +150,7 @@ enum FAQ {
                        + "slower option for anything that only runs inside real Android."),
             Item(question: "Android takes a long time to start",
                  answer: "The first start downloads the Android image and boots it from cold, which takes a few minutes. "
-                       + "After that Husk restores a saved machine, which is much faster."),
+                       + "After that Stride restores a saved machine, which is much faster."),
         ]),
     ]
 }
