@@ -2073,7 +2073,10 @@ static void parse_dynamic(tl_lib *L, uint64_t dyn_vaddr, uint64_t dyn_size)
     for (size_t i = 0; i < dyn_size / sizeof(elf_dyn); i++) {
         switch (d[i].d_tag) {
         case DT_NULL_: return;
-        case DT_NEEDED_: if (L->nneeded < MAX_DEPS) L->needed[L->nneeded++] = d[i].d_val; break;
+        case DT_NEEDED_:
+            if (L->nneeded >= MAX_DEPS) tl_log_line("ld: %s: too many DT_NEEDED entries (limit %d)", L->name, MAX_DEPS);
+            else L->needed[L->nneeded++] = d[i].d_val;
+            break;
         case DT_STRTAB_: L->strtab = d[i].d_val; break;
         case DT_STRSZ_: L->strsz = d[i].d_val; break;
         case DT_SYMTAB_: L->symtab = d[i].d_val; break;
@@ -2694,12 +2697,24 @@ static tl_lib *map_library(const char *name, uint8_t *file, size_t flen)
     L->tcb = rw + (npages + nstub + 1) * PAGE;
     fill_data_slots(L);
     L->aot = imported;
+    if (dyn_n % sizeof(elf_dyn) || !image_range(L, dyn_v, dyn_n)) {
+        tl_log_line("ld: %s: dynamic section is outside the mapped image or has an invalid size", name);
+        return NULL;
+    }
     parse_dynamic(L, dyn_v, dyn_n);
-    if (L->strtab) {
+    if (L->strtab && L->strsz && image_range(L, L->strtab, L->strsz)) {
         const elf_dyn *d = at(L, dyn_v);
         for (size_t i = 0; i < dyn_n / sizeof(elf_dyn) && d[i].d_tag != DT_NULL_; i++) {
-            if (d[i].d_tag == DT_SONAME_) snprintf(L->soname, sizeof(L->soname), "%s", (const char *)at(L, L->strtab) + d[i].d_val);
+            if (d[i].d_tag == DT_SONAME_) {
+                if (dynstr_valid(L, d[i].d_val))
+                    snprintf(L->soname, sizeof(L->soname), "%s", (const char *)at(L, L->strtab) + d[i].d_val);
+                else
+                    tl_log_line("ld: %s: invalid DT_SONAME string offset", name);
+            }
         }
+    } else if (L->strtab || L->strsz) {
+        tl_log_line("ld: %s: invalid dynamic string table", name);
+        return NULL;
     }
     if (!L->soname[0]) snprintf(L->soname, sizeof(L->soname), "%s", name);
     if (imported) {
@@ -2958,7 +2973,13 @@ static bool relocate(tl_lib *L)
     if (L->arm32) { L->state = 2; return true; }
     size_t count = 0;
     L->state = 1;
-    bool ok = do_relas(L, L->rela_src ? L->rela_src : (const uint8_t *)at(L, L->rela), L->relasz, &count)
+    bool tables_ok =
+        (!L->relasz || L->rela_src || image_range(L, L->rela, L->relasz)) &&
+        (!L->pltrelsz || L->jmprel_src || image_range(L, L->jmprel, L->pltrelsz)) &&
+        (!L->arelasz || L->arela_src || image_range(L, L->arela, L->arelasz)) &&
+        (!L->relrsz || L->relr_src || image_range(L, L->relr, L->relrsz));
+    bool ok = tables_ok &&
+           do_relas(L, L->rela_src ? L->rela_src : (const uint8_t *)at(L, L->rela), L->relasz, &count)
            && do_relas(L, L->jmprel_src ? L->jmprel_src : (const uint8_t *)at(L, L->jmprel), L->pltrelsz, &count)
            && do_packed(L, &count)
            && do_relr(L, &count);
@@ -3085,9 +3106,16 @@ static tl_lib *load_locked(const char *name, int depth, bool system)
 
     /* Dependencies first, so everything this library binds against exists. */
     for (int i = 0; i < L->nneeded; i++) {
+        if (!dynstr_valid(L, L->needed[i])) {
+            tl_log_line("ld: %s: DT_NEEDED[%d] has an invalid string-table offset", name, i);
+            return NULL;
+        }
         const char *dn = (const char *)at(L, L->strtab) + L->needed[i];
         if (tl_bionic_is_system_lib(dn)) continue;
-        if (!load_locked(dn, depth + 1, L->system)) tl_log_line("ld: %s: needed library %s could not be loaded", name, dn);
+        if (!load_locked(dn, depth + 1, L->system)) {
+            tl_log_line("ld: %s: required dependency %s could not be loaded", name, dn);
+            return NULL;
+        }
     }
     build_scope(L);
     if (!relocate(L)) return NULL;
