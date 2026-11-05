@@ -77,7 +77,7 @@ if ! grep -q "BUILD SUCCEEDED" "$DD/build.log"; then
     exit 1
 fi
 
-APP="$DD/Build/Products/Release-iphoneos/Husk.app"
+APP="$DD/Build/Products/Release-iphoneos/Stride.app"
 
 # The Java runtime in the app must be the one just built (build_java_runtime.sh): copied again here, and checked, so an IPA can
 # never carry an older one -- which looks exactly like Java fixes that did not work.
@@ -97,7 +97,7 @@ fi
 # Stamp the build's identity into the bundle so its logs can name themselves.
 # A log from a stale install is otherwise indistinguishable from a log proving a
 # fix did not work.
-APP_PLIST="$DD/Build/Products/Release-iphoneos/Husk.app/Info.plist"
+APP_PLIST="$DD/Build/Products/Release-iphoneos/Stride.app/Info.plist"
 if [ -f "$APP_PLIST" ]; then
     COMMIT="$(git -C "$HUSK_ROOT" rev-parse --short HEAD 2>/dev/null || echo unknown)"
     git -C "$HUSK_ROOT" diff --quiet 2>/dev/null || COMMIT="$COMMIT-dirty"
