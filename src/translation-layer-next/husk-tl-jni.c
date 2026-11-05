@@ -2,6 +2,8 @@
 #define _DARWIN_C_SOURCE
 #include "husk-tl-jni.h"
 
+#include <limits.h>
+#include <stdint.h>
 #include <pthread.h>
 #include <stdarg.h>
 #include <stdatomic.h>
