@@ -102,18 +102,28 @@ tl_jclass *tl_jni_declare(const char *name, const char *super)
 
 static tl_jclass *tl_jni_declare_linked(const char *name, const char *super)
 {
+    if (!name || !*name) return NULL;
     pthread_mutex_lock(&g_lock);
     tl_jclass *c = find_class_locked(name);
     if (!c) {
         c = calloc(1, sizeof(*c));
+        if (!c) { pthread_mutex_unlock(&g_lock); return NULL; }
         c->name = strdup(name);
-        uint32_t h = hash_str(name) % NBUCKETS;
-        c->next = g_classes[h];
-        g_classes[h] = c;
-        c->in_dex = tl_dexidx_has_class(name);
         c->mirror = obj_alloc(TL_K_CLASS, NULL);
+        if (!c->name || !c->mirror) {
+            free(c->name);
+            free(c->mirror);
+            free(c);
+            pthread_mutex_unlock(&g_lock);
+            tl_log_line("jni: out of memory declaring class %s", name);
+            return NULL;
+        }
+        uint32_t h = hash_str(name) % NBUCKETS;
+        c->in_dex = tl_dexidx_has_class(name);
         c->mirror->klass.jc = c;
         c->mirror->refs = 1u << 30;
+        c->next = g_classes[h];
+        g_classes[h] = c;
         /* A class the interpreter has bytecode for: it says what the superclass is, and keeps the statics. */
         if (tl_dvm) {
             c->linking = true;
@@ -136,6 +146,7 @@ static tl_jclass *tl_jni_declare_linked(const char *name, const char *super)
 
 tl_jclass *tl_jni_class(const char *name)
 {
+    if (!name || !*name) return NULL;
     tl_jclass *c;
     pthread_mutex_lock(&g_lock);
     c = find_class_locked(name);
@@ -149,7 +160,7 @@ tl_jclass *tl_jni_class(const char *name)
 
 const char *tl_jni_class_name(const jobj *o) { return o && o->kind == TL_K_CLASS ? o->klass.jc->name : (o && o->cls ? o->cls->name : "?"); }
 
-jobj *tl_jni_class_object(const char *name) { return tl_jni_class(name)->mirror; }
+jobj *tl_jni_class_object(const char *name) { tl_jclass *c = tl_jni_class(name); return c ? c->mirror : NULL; }
 
 jobj *tl_jni_new_object(tl_jclass *cls)
 {
@@ -470,9 +481,17 @@ static __thread jobj *t_pending;
 
 void tl_jni_throw(const char *cls, const char *msg)
 {
+    if (!cls || !*cls) cls = "java/lang/RuntimeException";
     jobj *e = tl_jni_new_object(tl_jni_class(cls));
-    jvalue v; v.l = tl_jni_new_string(msg ? msg : "");
-    tl_jni_set_field(e, "detailMessage", "Ljava/lang/String;", v);
+    if (!e) {
+        tl_log_line("jni: unable to allocate %s while throwing: %s", cls, msg ? msg : "");
+        return;
+    }
+    jobj *detail = tl_jni_new_string(msg ? msg : "");
+    if (detail) {
+        jvalue v = {0}; v.l = detail;
+        tl_jni_set_field(e, "detailMessage", "Ljava/lang/String;", v);
+    }
     t_pending = e;
     tl_log_line("jni: throwing %s: %s", cls, msg ? msg : "");
 }
@@ -616,10 +635,18 @@ static jvalue call_va(int kind, jobj *self, void *mid, tl_va_list *ap)
 
 jvalue tl_jni_call(jobj *self_or_class, const char *name, const char *sig, const jvalue *args)
 {
-    bool is_class = self_or_class && self_or_class->kind == TL_K_CLASS;
+    if (!self_or_class || !name || !sig) {
+        tl_jni_throw("java/lang/NullPointerException", "JNI method lookup received a null receiver, name, or signature");
+        return g_zero;
+    }
+    bool is_class = self_or_class->kind == TL_K_CLASS;
     tl_jclass *cls = is_class ? self_or_class->klass.jc : self_or_class->cls;
+    if (!cls) {
+        tl_jni_throw("java/lang/NoClassDefFoundError", "JNI receiver has no class");
+        return g_zero;
+    }
     tl_jmeth *m = lookup_method(cls, name, sig, is_class);
-    return invoke(is_class ? NULL : self_or_class, m, false, args);
+    return m ? invoke(is_class ? NULL : self_or_class, m, false, args) : g_zero;
 }
 
 /* ------------------------------------------------- the JNI function table */
@@ -631,6 +658,10 @@ static uint32_t jni_GetVersion(void *env) { (void)env; return 0x00010006; }
 static jo jni_FindClass(void *env, const char *name)
 {
     (void)env;
+    if (!name || !*name) {
+        tl_jni_throw("java/lang/NoClassDefFoundError", "FindClass called with an empty class name");
+        return NULL;
+    }
     bool array = name[0] == '[';
     bool framework = !strncmp(name, "android/", 8) || !strncmp(name, "java/", 5) || !strncmp(name, "javax/", 6)
                   || !strncmp(name, "dalvik/", 7) || !strncmp(name, "libcore/", 8) || !strncmp(name, "sun/", 4)
