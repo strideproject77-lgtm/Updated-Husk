@@ -25,7 +25,7 @@ struct FAQTab: View {
                     }
                 }
                 if sections.isEmpty {
-                    Text("Nothing matches “\(query)”. Open Settings › About › Open Console to see what Husk is doing.")
+                    Text("Nothing matches “\(query)”. Open Settings › About › Open Console to see what Stride is doing.")
                         .foregroundStyle(.secondary)
                 }
             }
@@ -85,7 +85,7 @@ enum FAQ {
                  answer: "Open StikDebug on its own and check that it has your pairing file and that LocalDevVPN is connected. "
                        + "Update StikDebug to the latest release. Husk sends StikDebug its script itself, so nothing needs setting up for Husk inside StikDebug."),
             Item(question: "Why do I have to turn JIT on again?",
-                 answer: "JIT lasts as long as Husk is running. When iOS closes Husk in the background, or you swipe it away, "
+                 answer: "JIT lasts as long as Stride is running. When iOS closes Stride in the background, or you swipe it away, "
                        + "the next launch needs JIT again. With Pair on this iPhone or a pairing file it is one tap."),
             Item(question: "Can I use Husk without JIT?",
                  answer: "You can browse and import apps, but nothing Android can run. Every game and app needs JIT."),
@@ -140,7 +140,7 @@ enum FAQ {
             Item(question: "Where are my saves?",
                  answer: "Each app keeps its data inside Husk. On an app's page, **Back Up Saves** exports them and **Restore Saves** brings them back, "
                        + "including onto another iPhone."),
-            Item(question: "Husk is using a lot of storage",
+            Item(question: "Stride is using a lot of storage",
                  answer: "Imported apps and their data live in Husk's folder. Remove games you no longer play from their page. "
                        + "The full Android system download is about 2 GB more and is only needed for Android itself."),
         ]),
