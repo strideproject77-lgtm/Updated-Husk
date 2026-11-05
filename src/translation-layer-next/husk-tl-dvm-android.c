@@ -214,8 +214,13 @@ NAT(N_readAsset)
     const uint8_t *d; size_t len; bool owned; char err[160];
     if (!tl_zip_data(z, e, (size_t)1 << 30, &d, &len, &owned, err, sizeof(err))) { *ret = L(NULL); return true; }
     jobj *arr = tl_jni_new_prim_array('B', (uint32_t)len);
+    if (!arr) {
+        if (owned) free((void *)d);
+        *ret = L(NULL);
+        return true;
+    }
     arr->refs = 1u << 30;
-    memcpy(arr->arr.data, d, len);
+    if (len) memcpy(arr->arr.data, d, len);
     if (owned) free((void *)d);
     *ret = L(arr);
     return true;
@@ -244,6 +249,7 @@ NAT(N_listAssets)
         }
     }
     jobj *arr = tl_jni_new_obj_array(tl_jni_class("java/lang/String"), (uint32_t)n);
+    if (!arr) { *ret = L(NULL); return true; }
     arr->cls = tl_jni_class("[Ljava/lang/String;");
     arr->refs = 1u << 30;
     for (int i = 0; i < n; i++) { arr->oarr.v[i] = jstr(names[i]); free(names[i]); }
@@ -382,11 +388,23 @@ NAT(N_apkPath) { (void)self; (void)a; *ret = L(jstr(A.apk)); return true; }
 /* ---- the host keyboard, clipboard, share sheet, orientation, insets */
 static void text_push(const char *kind, const char *utf8)
 {
-    pthread_mutex_lock(&A.t_lock);
-    if (A.ntext == A.ctext) { A.ctext = A.ctext ? A.ctext * 2 : 16; A.text = realloc(A.text, (size_t)A.ctext * sizeof(*A.text)); }
-    size_t l = strlen(kind) + (utf8 ? strlen(utf8) : 0) + 1;
+    if (!kind) return;
+    size_t nk = strlen(kind), nu = utf8 ? strlen(utf8) : 0;
+    if (nk > SIZE_MAX - nu - 1) return;
+    size_t l = nk + nu + 1;
     char *e = malloc(l);
+    if (!e) return;
     snprintf(e, l, "%s%s", kind, utf8 ? utf8 : "");
+    pthread_mutex_lock(&A.t_lock);
+    if (A.ntext == A.ctext) {
+        if (A.ctext > INT_MAX / 2) { pthread_mutex_unlock(&A.t_lock); free(e); return; }
+        int cap = A.ctext ? A.ctext * 2 : 16;
+        if ((size_t)cap > SIZE_MAX / sizeof(*A.text)) { pthread_mutex_unlock(&A.t_lock); free(e); return; }
+        char **grown = realloc(A.text, (size_t)cap * sizeof(*A.text));
+        if (!grown) { pthread_mutex_unlock(&A.t_lock); free(e); return; }
+        A.text = grown;
+        A.ctext = cap;
+    }
     A.text[A.ntext++] = e;
     pthread_mutex_unlock(&A.t_lock);
     tl_javaapp_touch(7, 0, 0, 0);
@@ -412,6 +430,7 @@ NAT(N_pollText)
     int n = A.ntext;
     if (!n) { pthread_mutex_unlock(&A.t_lock); *ret = L(NULL); return true; }
     jobj *arr = tl_jni_new_obj_array(tl_jni_class("java/lang/String"), (uint32_t)n);
+    if (!arr) { pthread_mutex_unlock(&A.t_lock); *ret = L(NULL); return true; }
     arr->cls = tl_jni_class("[Ljava/lang/String;");
     arr->refs = 1u << 30;
     for (int i = 0; i < n; i++) { arr->oarr.v[i] = jstr(A.text[i]); free(A.text[i]); }
