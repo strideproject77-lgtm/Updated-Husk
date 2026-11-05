@@ -3207,9 +3207,21 @@ static bool init_locked(tl_lib *L)
     char **argv = G.argv ? G.argv : fallback_argv, **envp = G.envp ? G.envp : fallback_envp;
     int argc = 1;
     typedef void (*init_fn)(int, char **, char **);
-    if (L->init) ((init_fn)(L->rx + (L->init - L->base_vaddr)))(argc, argv, envp);
-    if (L->init_array) {
+    if (L->init) {
+        if (!image_range(L, L->init, 4) || !in_code(L, L->init)) {
+            tl_log_line("ld: %s: DT_INIT points outside executable code", L->name);
+            return false;
+        }
+        ((init_fn)(L->rx + (L->init - L->base_vaddr)))(argc, argv, envp);
+    }
+    if (L->init_array || L->init_arraysz) {
+        if (L->init_arraysz % sizeof(uint64_t) ||
+            !image_range(L, L->init_array, L->init_arraysz)) {
+            tl_log_line("ld: %s: invalid DT_INIT_ARRAY range or size", L->name);
+            return false;
+        }
         const uint64_t *fns = at(L, L->init_array);
+        if (!fns && L->init_arraysz) return false;
         size_t n = L->init_arraysz / 8;
         static int trace = -1;
         if (trace < 0) trace = getenv("TL_INIT_TRACE") ? 1 : 0;   /* each constructor before and after it runs */
@@ -3217,7 +3229,12 @@ static bool init_locked(tl_lib *L)
         for (size_t i = 0; i < n; i++) {
             uint64_t f = fns[i];
             if (!f || f == ~0ull) continue;
-            if (trace) tl_log_line("ld: %s: constructor %zu at +%#llx", L->name, i, (unsigned long long)(f - (uint64_t)(uintptr_t)L->rx + L->base_vaddr));
+            uint64_t rx = (uint64_t)(uintptr_t)L->rx;
+            if (f < rx || f >= rx + L->npages * PAGE) {
+                tl_log_line("ld: %s: constructor %zu points outside its image", L->name, i);
+                return false;
+            }
+            if (trace) tl_log_line("ld: %s: constructor %zu at +%#llx", L->name, i, (unsigned long long)(f - rx + L->base_vaddr));
             /* TL_INIT_BREAK=<library>: a debugger stops here with the constructor's address in x0 and the image base in x1 */
             { const char *b = getenv("TL_INIT_BREAK");
               if (b && !strcmp(b, L->name)) __asm__ volatile("mov x0, %0\n mov x1, %1\n brk #0xf00d" :: "r"(f), "r"((uint64_t)(uintptr_t)L->rx) : "x0", "x1"); }
