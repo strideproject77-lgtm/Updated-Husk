@@ -1000,8 +1000,11 @@ static size_t utf16_len(const char *s)
 }
 static uint16_t *to_utf16(const char *s, size_t *outlen)
 {
+    if (!s) return NULL;
     size_t cap = utf16_len(s), k = 0;
-    uint16_t *u = malloc((cap + 1) * 2);
+    if (cap > SIZE_MAX / sizeof(uint16_t) - 1) return NULL;
+    uint16_t *u = malloc((cap + 1) * sizeof(uint16_t));
+    if (!u) return NULL;
     for (const unsigned char *p = (const unsigned char *)s; *p;) {
         uint32_t cp;
         if (*p < 0x80) { cp = *p; p += 1; }
@@ -1017,7 +1020,10 @@ static uint16_t *to_utf16(const char *s, size_t *outlen)
 }
 static char *from_utf16(const uint16_t *u, size_t n)
 {
-    char *out = malloc(n * 3 + 1); size_t k = 0;
+    if (n > (SIZE_MAX - 1) / 3 || (n && !u)) return NULL;
+    char *out = malloc(n * 3 + 1);
+    if (!out) return NULL;
+    size_t k = 0;
     for (size_t i = 0; i < n; i++) {
         uint32_t c = u[i];
         if (c >= 0xD800 && c < 0xDC00 && i + 1 < n) { c = 0x10000 + ((c - 0xD800) << 10) + (u[i + 1] - 0xDC00); i++; }
@@ -1147,9 +1153,25 @@ static int32_t jni_RegisterNatives(void *env, jo cls, const native_method *m, in
         if (!declared)
             tl_log_line("jni: RegisterNatives %s.%s%s: declared by no class in the chain, bound to %s anyway",
                         given->name, m[i].name, m[i].sig, c->name);
-        c->natives = realloc(c->natives, (size_t)(c->nnatives + 1) * sizeof(*c->natives));
-        c->natives[c->nnatives].name = strdup(m[i].name);
-        c->natives[c->nnatives].sig = strdup(m[i].sig);
+        char *native_name = strdup(m[i].name);
+        char *native_sig = strdup(m[i].sig);
+        if (!native_name || !native_sig || c->nnatives == INT_MAX ||
+            (size_t)(c->nnatives + 1) > SIZE_MAX / sizeof(*c->natives)) {
+            free(native_name); free(native_sig);
+            pthread_mutex_unlock(&g_lock);
+            tl_log_line("jni: RegisterNatives failed: out of memory");
+            return -1;
+        }
+        void *grown = realloc(c->natives, (size_t)(c->nnatives + 1) * sizeof(*c->natives));
+        if (!grown) {
+            free(native_name); free(native_sig);
+            pthread_mutex_unlock(&g_lock);
+            tl_log_line("jni: RegisterNatives failed: out of memory");
+            return -1;
+        }
+        c->natives = grown;
+        c->natives[c->nnatives].name = native_name;
+        c->natives[c->nnatives].sig = native_sig;
         c->natives[c->nnatives].fn = m[i].fn;
         c->nnatives++;
         TRACE("jni: RegisterNatives %s.%s%s -> %p", c->name, m[i].name, m[i].sig, m[i].fn);
