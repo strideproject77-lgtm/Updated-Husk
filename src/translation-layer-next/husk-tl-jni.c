@@ -1030,7 +1030,16 @@ static char *from_utf16(const uint16_t *u, size_t n)
     return out;
 }
 
-static jo jni_NewString(void *env, const uint16_t *chars, int32_t len) { (void)env; char *s = from_utf16(chars, (size_t)len); jo o = tl_jni_new_string(s); free(s); return o; }
+static jo jni_NewString(void *env, const uint16_t *chars, int32_t len)
+{
+    (void)env;
+    if (len < 0 || (len > 0 && !chars)) { tl_jni_throw("java/lang/IllegalArgumentException", "invalid NewString buffer or length"); return NULL; }
+    char *s = from_utf16(chars, (size_t)len);
+    if (!s) return NULL;
+    jo o = tl_jni_new_string(s);
+    free(s);
+    return o;
+}
 static int32_t jni_GetStringLength(void *env, jo s) { (void)env; return (int32_t)utf16_len(tl_jni_string(s) ? tl_jni_string(s) : ""); }
 static const uint16_t *jni_GetStringChars(void *env, jo s, uint8_t *copy) { (void)env; if (copy) *copy = 1; return to_utf16(tl_jni_string(s) ? tl_jni_string(s) : "", NULL); }
 static void jni_ReleaseStringChars(void *env, jo s, const uint16_t *c) { (void)env; (void)s; free((void *)c); }
@@ -1042,14 +1051,18 @@ static void jni_GetStringRegion(void *env, jo s, int32_t start, int32_t len, uin
 {
     (void)env;
     size_t n; uint16_t *u = to_utf16(tl_jni_string(s) ? tl_jni_string(s) : "", &n);
-    if (start >= 0 && len >= 0 && (size_t)(start + len) <= n) memcpy(buf, u + start, (size_t)len * 2);
+    if (start >= 0 && len >= 0 && (uint64_t)(uint32_t)start + (uint32_t)len <= n && (!len || buf))
+        memcpy(buf, u + start, (size_t)len * 2);
     free(u);
 }
 static void jni_GetStringUTFRegion(void *env, jo s, int32_t start, int32_t len, char *buf)
 {
     (void)env;
     size_t n; uint16_t *u = to_utf16(tl_jni_string(s) ? tl_jni_string(s) : "", &n);
-    if (start >= 0 && len >= 0 && (size_t)(start + len) <= n) { char *o = from_utf16(u + start, (size_t)len); strcpy(buf, o); free(o); }
+    if (start >= 0 && len >= 0 && (uint64_t)(uint32_t)start + (uint32_t)len <= n && (!len || buf)) {
+        char *o = from_utf16(u + start, (size_t)len);
+        if (o) { strcpy(buf, o); free(o); }
+    }
     free(u);
 }
 
@@ -1059,7 +1072,12 @@ static int32_t jni_GetArrayLength(void *env, jo a) { (void)env; return a ? (int3
 static jo jni_NewObjectArray(void *env, int32_t len, jo cls, jo init)
 {
     (void)env;
+    if (len < 0 || (cls && cls->kind != TL_K_CLASS)) {
+        tl_jni_throw("java/lang/IllegalArgumentException", "invalid object array length or element class");
+        return NULL;
+    }
     jo a = tl_jni_new_obj_array(cls ? cls->klass.jc : NULL, (uint32_t)len);
+    if (!a) return NULL;
     for (int32_t i = 0; init && i < len; i++) a->oarr.v[i] = tl_jni_ref(init);
     return a;
 }
@@ -1077,13 +1095,18 @@ static void jni_SetObjectArrayElement(void *env, jo a, int32_t i, jo v)
     X(Int, int32_t, 'I') X(Long, int64_t, 'J') X(Float, float, 'F') X(Double, double, 'D')
 
 #define GEN_ARRAYS(T, CT, K) \
-    static jo jni_New##T##Array(void *env, int32_t len) { (void)env; return tl_jni_new_prim_array(K, (uint32_t)len); } \
-    static CT *jni_Get##T##ArrayElements(void *env, jo a, uint8_t *copy) { (void)env; if (copy) *copy = 0; return a ? a->arr.data : NULL; } \
+    static jo jni_New##T##Array(void *env, int32_t len) { (void)env; \
+        if (len < 0) { tl_jni_throw("java/lang/NegativeArraySizeException", "negative primitive array length"); return NULL; } \
+        return tl_jni_new_prim_array(K, (uint32_t)len); } \
+    static CT *jni_Get##T##ArrayElements(void *env, jo a, uint8_t *copy) { (void)env; if (copy) *copy = 0; \
+        return (a && a->kind == TL_K_PRIM_ARRAY && a->arr.etype == K) ? a->arr.data : NULL; } \
     static void jni_Release##T##ArrayElements(void *env, jo a, CT *e, int32_t mode) { (void)env; (void)a; (void)e; (void)mode; } \
     static void jni_Get##T##ArrayRegion(void *env, jo a, int32_t s, int32_t n, CT *buf) { (void)env; \
-        if (a && s >= 0 && n >= 0 && (uint32_t)(s + n) <= a->arr.len) memcpy(buf, (CT *)a->arr.data + s, (size_t)n * sizeof(CT)); } \
+        if (a && a->kind == TL_K_PRIM_ARRAY && a->arr.etype == K && s >= 0 && n >= 0 && \
+            (uint64_t)(uint32_t)s + (uint32_t)n <= a->arr.len && (!n || buf)) memcpy(buf, (CT *)a->arr.data + s, (size_t)n * sizeof(CT)); } \
     static void jni_Set##T##ArrayRegion(void *env, jo a, int32_t s, int32_t n, const CT *buf) { (void)env; \
-        if (a && s >= 0 && n >= 0 && (uint32_t)(s + n) <= a->arr.len) memcpy((CT *)a->arr.data + s, buf, (size_t)n * sizeof(CT)); }
+        if (a && a->kind == TL_K_PRIM_ARRAY && a->arr.etype == K && s >= 0 && n >= 0 && \
+            (uint64_t)(uint32_t)s + (uint32_t)n <= a->arr.len && (!n || buf)) memcpy((CT *)a->arr.data + s, buf, (size_t)n * sizeof(CT)); }
 PRIM_ARRAYS(GEN_ARRAYS)
 
 static void *jni_GetPrimitiveArrayCritical(void *env, jo a, uint8_t *copy) { (void)env; if (copy) *copy = 0; return a ? a->arr.data : NULL; }
