@@ -278,6 +278,12 @@ final class TLUnityUIView: UIView, UIKeyInput {
         // Splits and the asset pack are part of the app, whatever its engine; the game's libraries and data may be in any of
         // them (a Google Play install keeps a Unity game's libraries in one split and its data in an asset pack).
         JITLess.prepareLaunch()
+        let angleAvailable = FileManager.default.fileExists(atPath: angle)
+        let mapJITState = JITBootstrap.mapJITResult.map { $0 ? "yes" : "no" } ?? "not probed"
+        HuskLog.log("tl", "preflight: engine=\(engine), JIT-less=\(JITLess.enabled), debugger=\(JITBootstrap.isDebuggerAttached), JIT-region=\(JITBootstrap.isLive), MAP_JIT=\(mapJITState), ANGLE=\(angleAvailable)")
+        if !angleAvailable && engine != .ue4 {
+            HuskLog.log("tl", "preflight warning: libANGLE-shared.dylib is missing; GLES-based engines may refuse to start")
+        }
         for extra in extraApks.prefix(15) { husk_native_add_package(extra) }
         // Android's shared storage, one folder for every game: a game that keeps its data in a folder of its own on /sdcard finds it
         // in Husk's "Shared Storage", which can be filled from Files or Finder.
@@ -312,16 +318,28 @@ final class TLUnityUIView: UIView, UIKeyInput {
             if geode != nil { HuskLog.log("geode", "loading Geode into the game") }
             started = husk_cocos_launch(apk, dataDir, layerPtr, Int32(width), Int32(height), angle, ca)
         case .java:
-            // Husk's Dalvik runtime: libcore, ICU and Husk's Java framework, carried in the app.
-            husk_java_set_runtime((Bundle.main.resourcePath ?? "") + "/java-runtime", Float(contentScaleFactor))
-            husk_java_set_night_mode(traitCollection.userInterfaceStyle == .dark ? 1 : 0)
-            // The notch and the home indicator, in surface pixels: the app's window keeps its content out of them.
-            if let inset = windowed ? UIEdgeInsets.zero : window?.safeAreaInsets {
-                let k = contentScaleFactor
-                husk_java_set_insets(Int32(inset.left * k), Int32(inset.top * k), Int32(inset.right * k), Int32(inset.bottom * k), 0)
+            // Java apps cannot start without the boot libraries and Husk's framework DEX.
+            let runtimeRoot = (Bundle.main.resourcePath ?? "") + "/java-runtime"
+            let requiredRuntimeFiles = ["husk-framework.dex", "com.android.art/javalib/core-oj.jar",
+                                        "com.android.art/javalib/core-libart.jar", "com.android.art/lib64/libjavacore.so",
+                                        "com.android.art/lib64/libopenjdk.so"]
+            let missingRuntimeFiles = requiredRuntimeFiles.filter {
+                !FileManager.default.fileExists(atPath: runtimeRoot + "/" + $0)
             }
-            attachWebHost(fresh: true)
-            started = husk_java_launch(apk, dataDir, layerPtr, Int32(width), Int32(height), angle, ca)
+            if !missingRuntimeFiles.isEmpty {
+                HuskLog.log("tl", "java: runtime incomplete; missing: \(missingRuntimeFiles.joined(separator: ", ")). Rebuild build/java-runtime with scripts/build_java_runtime.sh")
+                started = false
+            } else {
+                husk_java_set_runtime(runtimeRoot, Float(contentScaleFactor))
+                husk_java_set_night_mode(traitCollection.userInterfaceStyle == .dark ? 1 : 0)
+                // The notch and the home indicator, in surface pixels: the app's window keeps its content out of them.
+                if let inset = windowed ? UIEdgeInsets.zero : window?.safeAreaInsets {
+                    let k = contentScaleFactor
+                    husk_java_set_insets(Int32(inset.left * k), Int32(inset.top * k), Int32(inset.right * k), Int32(inset.bottom * k), 0)
+                }
+                attachWebHost(fresh: true)
+                started = husk_java_launch(apk, dataDir, layerPtr, Int32(width), Int32(height), angle, ca)
+            }
         case .gamemaker: started = husk_gamemaker_launch(apk, dataDir, layerPtr, Int32(width), Int32(height), angle, ca)
         case .flutter:
             // The screen's scale is the app's device pixel ratio, and the notch and home indicator its padding, in surface pixels.
