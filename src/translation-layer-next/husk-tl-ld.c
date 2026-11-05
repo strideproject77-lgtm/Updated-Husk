@@ -453,13 +453,16 @@ static const elf_sym *lib_find(const tl_lib *L, const char *name)
     if (L->arm32) return NULL;
     if (!L->symtab || !L->strtab) return NULL;
     if (L->gnu_hash) {
+        if (!image_range(L, L->gnu_hash, 16)) return NULL;
         const uint8_t *g = at(L, L->gnu_hash);
         uint32_t nb, symoff, bloom_n, bloom_shift;
         memcpy(&nb, g, 4); memcpy(&symoff, g + 4, 4); memcpy(&bloom_n, g + 8, 4); memcpy(&bloom_shift, g + 12, 4);
-        if (!nb) return NULL;
+        uint64_t head = 16ull + (uint64_t)bloom_n * 8 + (uint64_t)nb * 4;
+        if (!nb || !image_range(L, L->gnu_hash, head)) return NULL;
         const uint64_t *bloom = (const uint64_t *)(g + 16);
         const uint32_t *buckets = (const uint32_t *)(g + 16 + (size_t)bloom_n * 8);
         const uint32_t *chains = buckets + nb;
+        uint64_t max_chains = ((uint64_t)L->npages * PAGE - (L->gnu_hash - L->base_vaddr) - head) / 4;
         uint32_t h = gnu_hash(name);
         if (bloom_n) {
             uint64_t w = bloom[(h / 64) % bloom_n];
@@ -467,10 +470,10 @@ static const elf_sym *lib_find(const tl_lib *L, const char *name)
         }
         uint32_t b = buckets[h % nb];
         if (b < symoff) return NULL;
-        for (uint32_t i = b;; i++) {
+        for (uint64_t i = b; i >= symoff && i - symoff < max_chains && i <= UINT32_MAX; i++) {
             uint32_t c = chains[i - symoff];
             if ((h | 1) == (c | 1)) {
-                const elf_sym *s = sym_at(L, i);
+                const elf_sym *s = sym_at(L, (uint32_t)i);
                 if (s && s->st_shndx != SHN_UNDEF_ && !strcmp(sym_name(L, s), name)) return s;
             }
             if (c & 1) break;
@@ -478,9 +481,11 @@ static const elf_sym *lib_find(const tl_lib *L, const char *name)
         return NULL;
     }
     if (L->sysv_hash) {
+        if (!image_range(L, L->sysv_hash, 8)) return NULL;
         const uint32_t *t = at(L, L->sysv_hash);
         uint32_t nb = t[0], nc = t[1];
-        if (!nb) return NULL;
+        uint64_t words = 2ull + nb + nc;
+        if (!nb || !image_range(L, L->sysv_hash, words * 4)) return NULL;
         for (uint32_t i = t[2 + sysv_hash(name) % nb]; i && i < nc; i = t[2 + nb + i]) {
             const elf_sym *s = sym_at(L, i);
             if (s && s->st_shndx != SHN_UNDEF_ && !strcmp(sym_name(L, s), name)) return s;
@@ -1962,7 +1967,11 @@ static bool reloc_one(tl_lib *L, uint64_t r_offset, uint32_t type, uint32_t symi
 
 static bool do_relas(tl_lib *L, const uint8_t *table, uint64_t size, size_t *count)
 {
-    if (!table || !size) return true;
+    if (!size) return true;
+    if (!table || size % sizeof(elf_rela) || size > (256u << 20)) {
+        tl_log_line("ld: %s: invalid RELA table size (%llu)", L->name, (unsigned long long)size);
+        return false;
+    }
     const elf_rela *r = (const elf_rela *)table;
     for (size_t i = 0; i < size / sizeof(elf_rela); i++) {
         if (!reloc_one(L, r[i].r_offset, (uint32_t)(r[i].r_info & 0xffffffffu),
@@ -1996,8 +2005,10 @@ static bool do_packed(tl_lib *L, size_t *count)
      * own offset delta, info and addend delta as the flags leave them unshared.
      */
     if (!L->arela || !L->arelasz) return true;
+    if (L->arelasz < 4 || L->arelasz > (256u << 20) ||
+        (!L->arela_src && !image_range(L, L->arela, L->arelasz))) return false;
     const uint8_t *d = L->arela_src ? L->arela_src : at(L, L->arela);
-    if (memcmp(d, "APS2", 4) != 0) { tl_log_line("ld: %s: packed relocations lack APS2 magic", L->name); return false; }
+    if (!d || memcmp(d, "APS2", 4) != 0) { tl_log_line("ld: %s: packed relocations lack APS2 magic", L->name); return false; }
     sleb s = { d + 4, d + L->arelasz, false };
     int64_t total = rd_sleb(&s);
     uint64_t r_offset = (uint64_t)rd_sleb(&s), r_info = 0;
@@ -2029,7 +2040,10 @@ static bool do_packed(tl_lib *L, size_t *count)
 static bool do_relr(tl_lib *L, size_t *count)
 {
     if (!L->relr || !L->relrsz) return true;
+    if (L->relrsz % 8 || L->relrsz > (256u << 20) ||
+        (!L->relr_src && !image_range(L, L->relr, L->relrsz))) return false;
     const uint8_t *w = L->relr_src ? L->relr_src : at(L, L->relr);
+    if (!w) return false;
     uint64_t where = 0;
     for (size_t i = 0; i < L->relrsz / 8; i++) {
         uint64_t word = rd64(w + i * 8);
