@@ -298,10 +298,9 @@ final class TLUnityUIView: UIView, UIKeyInput {
         husk_native_set_extra_fonts(CJKFonts.directory.path)
         let started: Bool
         if !executableMemoryReady {
-            HuskLog.log("tl", "native: launch blocked — executable memory is unavailable. Enable JIT with StikDebug or Built-in StikJIT, then retry.")
-            started = false
-        } else {
-            switch engine {
+            HuskLog.log("tl", "native: executable memory preflight failed; attempting launch anyway so the native loader can report its exact failure")
+        }
+        switch engine {
         case .sdl:
             // The notch and the rounded corners, in the surface's pixels: the game keeps its controls out of them.
             if let inset = windowed ? UIEdgeInsets.zero : window?.safeAreaInsets {
@@ -325,7 +324,8 @@ final class TLUnityUIView: UIView, UIKeyInput {
             if geode != nil { HuskLog.log("geode", "loading Geode into the game") }
             started = husk_cocos_launch(apk, dataDir, layerPtr, Int32(width), Int32(height), angle, ca)
         case .java:
-            // Java apps cannot start without the boot libraries and Husk's framework DEX.
+            // Java apps need the boot libraries and Husk's framework DEX. Log
+            // omissions here, then let the runtime return its own detailed error.
             let runtimeRoot = (Bundle.main.resourcePath ?? "") + "/java-runtime"
             let requiredRuntimeFiles = ["husk-framework.dex", "com.android.art/javalib/core-oj.jar",
                                         "com.android.art/javalib/core-libart.jar", "com.android.art/lib64/libjavacore.so",
@@ -335,18 +335,16 @@ final class TLUnityUIView: UIView, UIKeyInput {
             }
             if !missingRuntimeFiles.isEmpty {
                 HuskLog.log("tl", "java: runtime incomplete; missing: \(missingRuntimeFiles.joined(separator: ", ")). Rebuild build/java-runtime with scripts/build_java_runtime.sh")
-                started = false
-            } else {
-                husk_java_set_runtime(runtimeRoot, Float(contentScaleFactor))
-                husk_java_set_night_mode(traitCollection.userInterfaceStyle == .dark ? 1 : 0)
-                // The notch and the home indicator, in surface pixels: the app's window keeps its content out of them.
-                if let inset = windowed ? UIEdgeInsets.zero : window?.safeAreaInsets {
-                    let k = contentScaleFactor
-                    husk_java_set_insets(Int32(inset.left * k), Int32(inset.top * k), Int32(inset.right * k), Int32(inset.bottom * k), 0)
-                }
-                attachWebHost(fresh: true)
-                started = husk_java_launch(apk, dataDir, layerPtr, Int32(width), Int32(height), angle, ca)
             }
+            husk_java_set_runtime(runtimeRoot, Float(contentScaleFactor))
+            husk_java_set_night_mode(traitCollection.userInterfaceStyle == .dark ? 1 : 0)
+            // The notch and the home indicator, in surface pixels: the app's window keeps its content out of them.
+            if let inset = windowed ? UIEdgeInsets.zero : window?.safeAreaInsets {
+                let k = contentScaleFactor
+                husk_java_set_insets(Int32(inset.left * k), Int32(inset.top * k), Int32(inset.right * k), Int32(inset.bottom * k), 0)
+            }
+            attachWebHost(fresh: true)
+            started = husk_java_launch(apk, dataDir, layerPtr, Int32(width), Int32(height), angle, ca)
         case .gamemaker: started = husk_gamemaker_launch(apk, dataDir, layerPtr, Int32(width), Int32(height), angle, ca)
         case .flutter:
             // The screen's scale is the app's device pixel ratio, and the notch and home indicator its padding, in surface pixels.
@@ -358,7 +356,6 @@ final class TLUnityUIView: UIView, UIKeyInput {
             started = husk_flutter_launch(apk, dataDir, layerPtr, Int32(width), Int32(height), angle, ca)
         case .minecraft: started = husk_gameactivity_launch(apk, dataDir, layerPtr, Int32(width), Int32(height), angle, ca)
         case .unity: started = husk_unity_launch(apk, dataDir, layerPtr, Int32(width), Int32(height), angle, ca)
-            }
         }
         if !started { HuskLog.log("tl", "native: launch refused") }
     }
