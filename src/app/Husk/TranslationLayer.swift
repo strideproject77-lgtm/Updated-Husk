@@ -97,10 +97,10 @@ extension TLReport {
         let flagged = libraries.filter { ($0.abi == "arm64-v8a" || $0.abi == "armeabi-v7a" || $0.abi == "armeabi") && $0.status != "ok" }.count
         let total = libraries.filter { $0.abi == "arm64-v8a" || $0.abi == "armeabi-v7a" || $0.abi == "armeabi" }.count
         var text = nativeEngine == .flutter
-            ? "A Flutter app. Its engine and its compiled Dart run natively through Husk's translation layer, which loads its \(total) arm64 libraries itself."
+            ? "Detected a Flutter app. Husk will try its native Flutter driver and load its \(total) arm64 libraries; this scan does not prove the app will start."
             : nativeEngine == .java && engine != "libGDX"
-            ? "An Android app. Husk runs its code on its own Java runtime" + (total > 0 ? " and loads its \(total) arm64 libraries itself." : ".")
-            : "A \(nativeEngineName) game. It runs through Husk's native runtime, which loads its \(total) arm64 libraries itself."
+            ? "Detected an Android app. Husk will try its Dalvik/Java driver" + (total > 0 ? " and its native library loader for \(total) arm64 libraries." : ".") + " The bundled Java runtime is required."
+            : "Detected a \(nativeEngineName) game. Husk has a native driver for this engine and will try to load its \(total) arm64 libraries; this scan does not prove the game will start."
         if nativeEngine == .cocos || nativeEngine == .minecraft || nativeEngine == .ue4 || nativeEngine == .gta { text += " It is a landscape game: Husk turns the screen for it." }
         else if nativeEngine == .sdl || nativeEngine == .nativeactivity || nativeEngine == .godot || nativeEngine == .gamemaker { text += " Husk turns the screen the way the game asks for." }
         if flagged > 0 {
@@ -577,15 +577,15 @@ struct TLChecksView: View {
 
     private var progressSection: some View {
         Section {
-            DetailRow(label: "App reports", value: "working", mono: false)
-            DetailRow(label: "Device checks", value: "working", mono: false)
-            DetailRow(label: "Library loader", value: "working", mono: false)
-            DetailRow(label: "Android runtime", value: "Unity, cocos2d-x, GameActivity, SDL3", mono: false)
-            DetailRow(label: "Opening apps", value: "Unity, cocos2d-x, Minecraft and SDL3 games", mono: false)
+            DetailRow(label: "APK reports", value: "Implemented; detection is not a launch test", mono: false)
+            DetailRow(label: "Device checks", value: "Implemented; run on this iPhone", mono: false)
+            DetailRow(label: "Native drivers", value: "Experimental; engine-specific launch paths", mono: false)
+            DetailRow(label: "Java runtime", value: "Requires bundled java-runtime assets", mono: false)
+            DetailRow(label: "Game execution", value: "Not verified until frames are drawn on-device", mono: false)
         } header: {
             Text("Where it stands")
         } footer: {
-            Text("The plan, in order, is docs/04-translation-layer.md in Husk's source.")
+            Text("A scan identifies an engine; only a real launch and rendered frames confirm compatibility. See docs/05-translation-layer-milestone2-handoff.md and the native runtime source.")
         }
     }
 }
