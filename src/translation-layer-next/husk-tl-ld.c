@@ -1986,9 +1986,11 @@ static int64_t rd_sleb(sleb *s)
 {
     uint64_t v = 0; unsigned shift = 0; uint8_t b;
     do {
-        if (s->p >= s->end || shift >= 64) { s->bad = true; return 0; }
+        if (s->p >= s->end || shift > 63) { s->bad = true; return 0; }
         b = *s->p++;
-        v |= (uint64_t)(b & 0x7f) << shift;
+        uint8_t payload = b & 0x7f;
+        if (shift == 63 && payload != 0 && payload != 0x7f) { s->bad = true; return 0; }
+        v |= (uint64_t)payload << shift;
         shift += 7;
     } while (b & 0x80);
     if (shift < 64 && (b & 0x40)) v |= ~0ull << shift;
@@ -2048,17 +2050,25 @@ static bool do_relr(tl_lib *L, size_t *count)
     for (size_t i = 0; i < L->relrsz / 8; i++) {
         uint64_t word = rd64(w + i * 8);
         if (!(word & 1)) {
-            if (!reloc_one(L, word, R_RELATIVE, 0, (int64_t)rd64(waddr(L, word - L->base_vaddr)))) return false;
+            if (word < L->base_vaddr || !image_range(L, word, 8)) return false;
+            int64_t addend = (int64_t)rd64(waddr(L, word - L->base_vaddr));
+            if (!reloc_one(L, word, R_RELATIVE, 0, addend)) return false;
             (*count)++;
+            if (word > UINT64_MAX - 8) return false;
             where = word + 8;
         } else {
             for (unsigned b = 1; b < 64; b++) {
                 if (word & (1ull << b)) {
-                    uint64_t a = where + (uint64_t)(b - 1) * 8;
-                    if (!reloc_one(L, a, R_RELATIVE, 0, (int64_t)rd64(waddr(L, a - L->base_vaddr)))) return false;
+                    uint64_t delta = (uint64_t)(b - 1) * 8;
+                    if (where > UINT64_MAX - delta) return false;
+                    uint64_t a = where + delta;
+                    if (!image_range(L, a, 8)) return false;
+                    int64_t addend = (int64_t)rd64(waddr(L, a - L->base_vaddr));
+                    if (!reloc_one(L, a, R_RELATIVE, 0, addend)) return false;
                     (*count)++;
                 }
             }
+            if (where > UINT64_MAX - 63 * 8) return false;
             where += 63 * 8;
         }
     }
@@ -2495,6 +2505,13 @@ static tl_lib *map_library(const char *name, uint8_t *file, size_t flen)
     uint64_t base_vaddr = 0;
     size_t npages = tl_page_plan(loads, (size_t)nloads, has_relro ? &relro : NULL, PAGE, NULL, 0, &base_vaddr);
     if (!npages) { tl_log_line("ld: %s: unusable page layout", name); free(phs); return NULL; }
+    uint64_t image_bytes = (uint64_t)npages * PAGE;
+    if (dyn_n % sizeof(elf_dyn) || dyn_v < base_vaddr ||
+        dyn_v - base_vaddr > image_bytes || dyn_n > image_bytes - (dyn_v - base_vaddr)) {
+        tl_log_line("ld: %s: dynamic section is outside the mapped image or has an invalid size", name);
+        free(phs);
+        return NULL;
+    }
     uint8_t *flags = malloc(npages);
     tl_page_plan(loads, (size_t)nloads, has_relro ? &relro : NULL, PAGE, flags, npages, &base_vaddr);
 
@@ -2697,10 +2714,6 @@ static tl_lib *map_library(const char *name, uint8_t *file, size_t flen)
     L->tcb = rw + (npages + nstub + 1) * PAGE;
     fill_data_slots(L);
     L->aot = imported;
-    if (dyn_n % sizeof(elf_dyn) || !image_range(L, dyn_v, dyn_n)) {
-        tl_log_line("ld: %s: dynamic section is outside the mapped image or has an invalid size", name);
-        return NULL;
-    }
     parse_dynamic(L, dyn_v, dyn_n);
     if (L->strtab && L->strsz && image_range(L, L->strtab, L->strsz)) {
         const elf_dyn *d = at(L, dyn_v);
