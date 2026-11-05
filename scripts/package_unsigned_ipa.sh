@@ -2,10 +2,10 @@
 # Build and package a genuinely unsigned Husk IPA for later sideload signing.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-OUT="${1:-$ROOT/build/Husk-unsigned.ipa}"
+OUT="${1:-$ROOT/build/Stride-unsigned.ipa}"
 DD="${DD:-$ROOT/build/unsigned-derived}"
 PROJECT="$ROOT/src/app/Husk.xcodeproj"
-APP="$DD/Build/Products/Release-iphoneos/Husk.app"
+APP="$DD/Build/Products/Release-iphoneos/Stride.app"
 mkdir -p "$(dirname "$OUT")" "$DD"
 
 command -v xcodegen >/dev/null || { echo "xcodegen is required" >&2; exit 1; }
@@ -42,7 +42,7 @@ fi
 STAGE="$(mktemp -d "$DD/unsigned-stage.XXXXXX")"
 trap 'rm -rf "$STAGE"' EXIT
 mkdir -p "$STAGE/Payload"
-ditto "$APP" "$STAGE/Payload/Husk.app"
+ditto "$APP" "$STAGE/Payload/Stride.app"
 (cd "$STAGE" && /usr/bin/zip -qry "$OUT" Payload)
 unzip -t "$OUT" >/dev/null
 echo "==> unsigned IPA ready: $OUT"
