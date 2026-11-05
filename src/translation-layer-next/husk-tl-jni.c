@@ -593,7 +593,7 @@ static jvalue call_va(int kind, jobj *self, void *mid, tl_va_list *ap)
     tl_jmeth *m = mid_ok(mid);
     if (!m) return g_zero;
     if (kind != 2 && !self) return null_receiver(m);
-    jvalue args[40];
+    jvalue args[256];
     args_from_va(m, ap, args);
     if (kind != 2 && string_init_in_place(self, m, args)) return g_zero;
     return invoke(kind == 2 ? NULL : self, m, kind == 1, args);
@@ -779,7 +779,7 @@ static jo new_object(jo cls, void *mid, int how, const jvalue *a, tl_va_list *ap
     jobj *o = tl_jni_new_object(cls->klass.jc);
     tl_jmeth *m = mid_ok(mid);
     if (m) {
-        jvalue args[40];
+        jvalue args[256];
         if (how == 1) args_from_va(m, ap, args);
         const jvalue *use = how == 1 ? args : a;
         /* new String(...) through JNI: ART makes it with StringFactory, as bytecode does. */
@@ -1099,10 +1099,18 @@ static unsigned g_natives_generation;
 static int32_t jni_RegisterNatives(void *env, jo cls, const native_method *m, int32_t n)
 {
     (void)env;
-    if (!cls || cls->kind != TL_K_CLASS) {
-        tl_log_line("jni: RegisterNatives failed: %s (%d methods)", cls ? "not a class object" : "null class", (int)n);
+    if (!cls || cls->kind != TL_K_CLASS || n < 0 || (n > 0 && !m)) {
+        tl_log_line("jni: RegisterNatives failed: invalid class or method table (%d methods)", (int)n);
         return -1;
     }
+    /* Validate the complete table before changing any class: a malformed entry must not leave a partial registration. */
+    for (int32_t i = 0; i < n; i++) {
+        if (!m[i].name || !m[i].name[0] || !m[i].sig || !m[i].sig[0] || !m[i].fn) {
+            tl_log_line("jni: RegisterNatives failed: invalid entry at index %d", (int)i);
+            return -1;
+        }
+    }
+    if (!n) return 0;
     tl_jclass *given = cls->klass.jc;
     bool tl_dvm_declares(tl_jclass *jc, const char *name, const char *sig);
     pthread_mutex_lock(&g_lock);
