@@ -352,6 +352,12 @@ static tl_jmeth *lookup_method(tl_jclass *cls, const char *name, const char *sig
         }
     }
     if (cls->nmeths == cls->capm) {
+        if (cls->capm > INT_MAX / 2) {
+            pthread_mutex_unlock(&g_lock);
+            free(m->name); free(m->sig); free(m);
+            tl_log_line("jni: method cache capacity overflow for %s", cls->name);
+            return NULL;
+        }
         int next = cls->capm ? cls->capm * 2 : 8;
         if (next < cls->capm || (size_t)next > SIZE_MAX / sizeof(*cls->meths)) {
             pthread_mutex_unlock(&g_lock);
