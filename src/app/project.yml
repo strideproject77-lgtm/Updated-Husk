@@ -54,6 +54,7 @@ targets:
       - path: Shared
     settings:
       base:
+        PRODUCT_NAME: Stride
         PRODUCT_BUNDLE_IDENTIFIER: $(HUSK_BUNDLE_IDENTIFIER)
         # Set your team here rather than in Xcode's UI: this file is the source of
         # truth, and `xcodegen generate` overwrites Husk.xcodeproj.
