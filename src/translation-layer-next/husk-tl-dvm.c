@@ -847,19 +847,36 @@ bool dvm_instance_of(jobj *o, tl_jclass *c) { return o && dvm_assignable(dvm_obj
 
 bool dvm_throw(const char *cls, const char *fmt, ...)
 {
+    if (!cls || !*cls) cls = "java/lang/RuntimeException";
     char msg[600] = "";
     if (fmt) { va_list ap; va_start(ap, fmt); vsnprintf(msg, sizeof(msg), fmt, ap); va_end(ap); }
     tl_jclass *jc = dvm_class_named(cls);
     if (!jc) jc = tl_jni_class(cls);
+    if (!jc) {
+        tl_log_line("dvm: unable to resolve exception class %s: %s", cls, msg);
+        tl_jni_throw("java/lang/RuntimeException", msg);
+        return false;
+    }
     dvm_class *c = dvm_class_of(jc);
     jobj *e = dvm_new_object(jc);
+    if (!e) {
+        tl_log_line("dvm: unable to allocate exception %s: %s", cls, msg);
+        tl_jni_throw("java/lang/OutOfMemoryError", "unable to allocate exception object");
+        return false;
+    }
     if (c) {
         dvm_ensure_init(c);
         dvm_method *init = dvm_find_method(c, "<init>", "(Ljava/lang/String;)V", false);
-        jvalue a; a.l = fmt ? dvm_new_string_utf8(msg) : NULL;
-        if (init) { jobj *saved = tl_jni_pending_object(); tl_jni_set_pending(NULL); jvalue r; dvm_call(init, e, &a, &r); if (!tl_jni_pending_object()) tl_jni_set_pending(saved); }
+        jvalue a = {0}; a.l = fmt ? dvm_new_string_utf8(msg) : NULL;
+        if (init) {
+            jobj *saved = tl_jni_pending_object();
+            tl_jni_set_pending(NULL);
+            jvalue r = {0};
+            dvm_call(init, e, &a, &r);
+            if (!tl_jni_pending_object()) tl_jni_set_pending(saved);
+        }
     } else {
-        jvalue v; v.l = dvm_new_string_utf8(msg);
+        jvalue v = {0}; v.l = dvm_new_string_utf8(msg);
         tl_jni_set_field(e, "detailMessage", "Ljava/lang/String;", v);
     }
     if (g_dvm_trace >= 1) tl_log_line("dvm: throw %s: %s", cls, msg);
@@ -2556,6 +2573,8 @@ bool tl_dvm_load_natives(const char *libdir)
 
 bool tl_dvm_call_static(const char *cls, const char *name, const char *sig, const jvalue *args, jvalue *ret)
 {
+    if (!cls || !*cls || !name || !*name || !sig || !*sig)
+        return dvm_throw("java/lang/NullPointerException", "invalid static method call metadata");
     tl_jclass *jc = dvm_class_named(cls);
     dvm_class *c = dvm_class_of(jc);
     if (!c) return dvm_throw("java/lang/NoClassDefFoundError", "%s", cls);
