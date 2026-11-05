@@ -199,7 +199,7 @@ struct OnboardingView: View {
         case .welcome: welcome
         case .language:
             picker(symbol: "globe", title: "Language",
-                   subtitle: "The language Husk and the apps and games in it use, from the next time Husk opens.",
+                   subtitle: "The language Stride and the apps and games in it use, from the next time Stride opens.",
                    rows: Self.languages, selection: $language)
         case .region:
             picker(symbol: "map.fill", title: "Region",
