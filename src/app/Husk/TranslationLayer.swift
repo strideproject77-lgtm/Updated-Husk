@@ -104,8 +104,7 @@ extension TLReport {
         if nativeEngine == .cocos || nativeEngine == .minecraft || nativeEngine == .ue4 || nativeEngine == .gta { text += " It is a landscape game: Husk turns the screen for it." }
         else if nativeEngine == .sdl || nativeEngine == .nativeactivity || nativeEngine == .godot || nativeEngine == .gamemaker { text += " Husk turns the screen the way the game asks for." }
         if flagged > 0 {
-            text += " \(flagged) of them use tricks the older loader could not handle; the native runtime handles those too, "
-                  + "except for optional anti-tamper code, which it leaves out."
+            text += " The static scanner flagged \(flagged) native libraries; the launch driver may still refuse them if a required import, relocation, or runtime feature is unsupported."
         }
         return text
     }
