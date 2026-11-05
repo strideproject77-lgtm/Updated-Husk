@@ -551,6 +551,7 @@ dvm_native_fn tl_web_native(const char *name, const char *sig);
 bool tl_web_any_visible(void);
 dvm_native_fn dvm_android_native(const char *cls, const char *name, const char *sig)
 {
+    if (!cls || !name || !sig) return NULL;
     if (!strcmp(cls, "husk/Sqlite")) return tl_sqlite_native(name, sig);
     if (!strcmp(cls, "husk/MediaCodecNative")) return tl_media_native(name, sig);
     if (!strcmp(cls, "husk/Web")) return tl_web_native(name, sig);
@@ -1183,6 +1184,11 @@ static void stub_lib(const char *name, uint64_t size, void *dir)
 
 bool tl_javaapp_start(const tl_javaapp_config *cfg)
 {
+    if (!cfg || !cfg->apk_path || !cfg->apk_path[0] || !cfg->data_dir || !cfg->data_dir[0] ||
+        cfg->width <= 0 || cfg->height <= 0) {
+        tl_log_line("javaapp: invalid launch configuration (APK, data directory, and positive surface size are required)");
+        return false;
+    }
     atomic_store(&A.ended, false);
     atomic_store(&A.paused, false);
     atomic_store(&A.frames, 0);
@@ -1245,10 +1251,36 @@ bool tl_javaapp_start(const tl_javaapp_config *cfg)
         }
     }
     { char lib[1100]; snprintf(lib, sizeof(lib), "%s/lib", A.data); mkdir(lib, 0755); tl_ld_apk_libs(stub_lib, lib); }
-    { pthread_attr_t rt; pthread_attr_init(&rt); pthread_attr_setstacksize(&rt, 64u << 20); A.gl_thread_started = pthread_create(&A.gl_thread, &rt, gl_main, NULL) == 0; }
-    pthread_attr_t at; pthread_attr_init(&at); pthread_attr_setstacksize(&at, 256u << 20);
-    A.app_started = pthread_create(&A.app_thread, &at, app_main, NULL) == 0;
-    return A.app_started;
+    pthread_attr_t rt;
+    int rc = pthread_attr_init(&rt);
+    if (!rc) {
+        rc = pthread_attr_setstacksize(&rt, 64u << 20);
+        if (!rc) rc = pthread_create(&A.gl_thread, &rt, gl_main, NULL);
+        pthread_attr_destroy(&rt);
+    }
+    if (rc) {
+        tl_log_line("javaapp: could not start GL thread: %s", strerror(rc));
+        return false;
+    }
+    A.gl_thread_started = true;
+
+    pthread_attr_t at;
+    rc = pthread_attr_init(&at);
+    if (!rc) {
+        rc = pthread_attr_setstacksize(&at, 256u << 20);
+        if (!rc) rc = pthread_create(&A.app_thread, &at, app_main, NULL);
+        pthread_attr_destroy(&at);
+    }
+    if (rc) {
+        tl_log_line("javaapp: could not start app thread: %s", strerror(rc));
+        atomic_store(&A.ended, true);
+        pthread_join(A.gl_thread, NULL);
+        A.gl_thread_started = false;
+        atomic_store(&A.ended, false);
+        return false;
+    }
+    A.app_started = true;
+    return true;
 }
 
 void tl_javaapp_stop(void)
