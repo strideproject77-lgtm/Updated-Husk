@@ -19,7 +19,7 @@ struct SettingsTab: View {
                         .foregroundStyle(.primary)
                 } footer: {
                     if !account.signedIn {
-                        Text("A Husk account keeps your profile, playtime and achievements, here and on itslevii.dev.")
+                        Text("A Stride account keeps your profile, playtime and achievements, here and on itslevii.dev.")
                     }
                 }
 
@@ -35,7 +35,7 @@ struct SettingsTab: View {
                     row(AppearanceSettings(), "paintbrush.fill", .pink, "Appearance", "Light or dark, accent colour, app icon")
                     row(FontSettings(), "textformat", .indigo, "Fonts", "Chinese, Japanese and Korean text")
                     row(FAQTab(), "questionmark.circle.fill", .teal, "Help", "Answers to common problems")
-                    row(AboutSettings(), "info.circle.fill", .gray, "About Husk", "Version \(Bundle.main.version) · \(Bundle.main.commit)")
+                    row(AboutSettings(), "info.circle.fill", .gray, "About Stride", "Version \(Bundle.main.version) · \(Bundle.main.commit)")
                 }
 
                 Section {
@@ -43,7 +43,7 @@ struct SettingsTab: View {
                         Label {
                             VStack(alignment: .leading, spacing: 1) {
                                 Text("Open Apps in Windows")
-                                Text("Use Husk while an app runs").font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                                Text("Use Stride while an app runs").font(.caption).foregroundStyle(.secondary).lineLimit(1)
                             }
                         } icon: {
                             RoundedRectangle(cornerRadius: 7, style: .continuous)
@@ -112,13 +112,13 @@ struct SettingsTab: View {
                 if account.signedIn { AccountAvatar(size: 60) } else { HuskMark(size: 60) }
             }
             VStack(alignment: .leading, spacing: 2) {
-                Text(account.signedIn ? (account.user?.displayName ?? "Husk Account") : "Sign In")
+                Text(account.signedIn ? (account.user?.displayName ?? "Stride Account") : "Sign In")
                     .font(.title3.weight(.semibold))
                 Text(account.signedIn ? "@" + (account.user?.username ?? "") : "Profile, playtime and achievements")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
-                Text("Husk \(Bundle.main.version) · \(Bundle.main.commit)")
+                Text("Stride \(Bundle.main.version) · \(Bundle.main.commit)")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
             }
@@ -322,7 +322,7 @@ struct PerformanceSettings: View {
             } header: {
                 Text("Memory")
             } footer: {
-                Text("What this install was signed with. If one is Off, big games can close early: sign Husk with a method that keeps these entitlements.")
+                Text("What this install was signed with. If one is Off, big games can close early: sign Stride with a method that keeps these entitlements.")
             }
             Section {
                 Picker("Renderer", selection: $gpuMode) {
@@ -600,7 +600,7 @@ struct JITLessSettings: View {
                     DetailRow(label: "Team", value: info.teamID)
                     DetailRow(label: "Expires", value: info.expires.formatted(date: .abbreviated, time: .shortened), mono: false)
                     if info.expires < Date() {
-                        Text("This certificate has expired. Refresh Husk in your store, then import its certificate again.")
+                        Text("This certificate has expired. Refresh Stride in your store, then import its certificate again.")
                             .font(.caption).foregroundStyle(.orange)
                     }
                 } else {
@@ -729,7 +729,7 @@ struct JITSettings: View {
                                : JITBootstrap.prewarmed ? "answering" : "not answering",
                           mono: false)
                 if let route = husk_ios_jit_self_route() {
-                    DetailRow(label: "Made by Husk",
+                    DetailRow(label: "Made by Stride",
                               value: String(cString: route) == "MAP_JIT" ? "MAP_JIT (dynamic-codesigning)" : "plain memory (debugged or jailbroken)",
                               mono: false)
                 }
@@ -762,7 +762,7 @@ struct JITSettings: View {
             } header: {
                 Text("JIT")
             } footer: {
-                Text("Husk needs memory it can write and then execute, which on iOS "
+                Text("Stride needs memory it can write and then execute, which on iOS "
                    + "takes an attached debugger. There are two ways to get it: a "
                    + "debugger that services trap requests, or a MAP_JIT mapping, "
                    + "which the kernel allows any debugged process. Either one is "
@@ -774,7 +774,7 @@ struct JITSettings: View {
                 Section {
                     Toggle("Turn On JIT with TrollStore at Launch", isOn: $trollStoreJIT)
                 } footer: {
-                    Text("Each time Husk opens without JIT, it asks TrollStore to turn it on. TrollStore's URL Scheme setting must be on.")
+                    Text("Each time Stride opens without JIT, it asks TrollStore to turn it on. TrollStore's URL Scheme setting must be on.")
                 }
             }
 
@@ -783,7 +783,7 @@ struct JITSettings: View {
                     .disabled(!HuskBuiltInJIT.isAvailable)
             } footer: {
                 Text(HuskBuiltInJIT.isAvailable
-                     ? "Each time Husk opens without JIT, it asks the built-in StikJIT to turn it on, so games are ready "
+                     ? "Each time Stride opens without JIT, it asks the built-in StikJIT to turn it on, so games are ready "
                        + "without a tap. Needs StikJIT set up once (paired) first."
                      : "Needs the built-in StikJIT, which is available on iOS 26 and later.")
             }
@@ -794,14 +794,14 @@ struct JITSettings: View {
                         UserDefaults.standard.set(v, forKey: "husk.autoStart")
                     }
             } footer: {
-                Text("Boots the guest as soon as Husk opens, when JIT is available.")
+                Text("Boots the guest as soon as Stride opens, when JIT is available.")
             }
 
             Section {
                 Toggle("Keep debugger attached", isOn: $keepAttached)
                     .onChange(of: keepAttached) { v in JITBootstrap.keepDebuggerAttached = v }
             } footer: {
-                Text("Off by default. Husk detaches StikDebug as soon as the "
+                Text("Off by default. Stride detaches StikDebug as soon as the "
                    + "JIT region is held, because a debugger that iOS has suspended "
                    + "stops the whole app the next time it is needed. Turn this on "
                    + "only to collect StikDebug's own logs.")
@@ -853,7 +853,7 @@ struct SavedMachineSettings: View {
                 }
                 .disabled(runner.isSavingState)
             } footer: {
-                Text("Husk restores a saved machine instead of booting it, which takes "
+                Text("Stride restores a saved machine instead of booting it, which takes "
                    + "seconds rather than minutes. The picture freezes while it writes. "
                    + "With this off, nothing saves by itself — including after an "
                    + "install.")
@@ -904,7 +904,7 @@ struct SavedMachineSettings: View {
             Section {
                 Toggle("Ask about Android updates", isOn: $askUpdates)
             } footer: {
-                Text("When a new Android image or snapshot is published, Husk asks once whether to download it. "
+                Text("When a new Android image or snapshot is published, Stride asks once whether to download it. "
                    + "Never asked before Android has been downloaded.")
             }
         }
@@ -1059,7 +1059,7 @@ struct AboutSettings: View {
             Section {
                 VStack(spacing: 8) {
                     HuskMark(size: 84)
-                    Text("Husk").font(.title2.weight(.semibold))
+                    Text("Stride").font(.title2.weight(.semibold))
                     Text("Version \(Bundle.main.version)")
                         .font(.subheadline).foregroundStyle(.secondary)
                 }
@@ -1098,8 +1098,8 @@ struct AboutSettings: View {
                     Label("Open Console", systemImage: "terminal")
                 }
             } footer: {
-                Text("Husk runs unmodified Android APKs in a real Android system on your iPhone. "
-                   + "The console shows Husk's live log, the guest's serial output and QEMU's own "
+                Text("Stride runs unmodified Android APKs in a real Android system on your iPhone. "
+                   + "The console shows Stride's live log, the guest's serial output and QEMU's own "
                    + "output — the three files any problem here is diagnosed from.")
             }
         }
