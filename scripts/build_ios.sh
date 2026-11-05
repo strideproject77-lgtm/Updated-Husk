@@ -136,10 +136,19 @@ apply_patch() {
     local dir="$1"
     local patch="$2"
     local stamp="$SRC/$dir/.husk-patched"
+    local patch_file="$HUSK_ROOT/patches/$patch"
     [ -f "$stamp" ] && return 0
-    [ -f "$HUSK_ROOT/patches/$patch" ] || return 0
+    [ -f "$patch_file" ] || return 0
     echo "[patch] $dir <- $patch"
-    ( cd "$SRC/$dir" && patch -p1 -N -r - < "$HUSK_ROOT/patches/$patch" ) >/dev/null 2>&1
+
+    # A persistent source tree may already contain the patch even if its stamp
+    # was lost. Detect that state before attempting a forward application.
+    if ( cd "$SRC/$dir" && patch -p1 --reverse --dry-run < "$patch_file" ) >/dev/null 2>&1; then
+        echo "[skip] $patch is already applied"
+    elif ! ( cd "$SRC/$dir" && patch -p1 --forward -r - < "$patch_file" ) >/dev/null 2>&1; then
+        echo "[FAIL] could not apply $patch to $dir" >&2
+        return 1
+    fi
     touch "$stamp"
 }
 
