@@ -88,7 +88,7 @@ struct SettingsTab: View {
                     Text("Compatibility")
                 } footer: {
                     Text("Game pages and the Store show how each app runs for everyone, from itslevii.dev. Your reports go there "
-                       + "with your device, iOS version, Husk build and JIT method.")
+                       + "with your device, iOS version, Stride build and JIT method.")
                 }
 
                 Section {
@@ -710,7 +710,7 @@ struct JITSettings: View {
             } footer: {
                 Text(jit.method == .automatic
                      ? jit.automaticDescription + " Built-in StikJIT needs iOS 26, LocalDevVPN, and a "
-                       + "pairing file, which Husk can make itself on iOS 27."
+                       + "pairing file, which Stride can make itself on iOS 27."
                      : HuskBuiltInJIT.unavailableReason ?? "Built-in StikJIT needs LocalDevVPN and a pairing "
                        + "file, which Husk can make itself on iOS 27.")
             }
