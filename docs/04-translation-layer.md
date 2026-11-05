@@ -1,5 +1,7 @@
 # The translation layer: Android apps without booting Android
 
+> **Status note (Updated-Husk main): this is the original M0 design document, not the current execution status.** The repository now also contains the DEX interpreter, native linker, JNI/Bionic shims and engine-specific launch drivers under `src/translation-layer-next/`, with the app entry points in `src/app/Husk/TLUnityView.swift`. See `docs/05-translation-layer-milestone2-handoff.md` and the source before drawing conclusions about what is implemented. A scan or engine classification still does not prove that a particular APK launches successfully; only on-device rendered frames do.
+
 Status: **experimental, first stretch built.** Settings › Experimental › Android
 Translation Layer exists. Apps can be added there and each gets a report of
 what running it would take, and the phone can be asked the questions the design
