@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build Husk unsigned IPA
+    name: Build Stride unsigned IPA
     runs-on: macos-15
     timeout-minutes: 360
     steps:
@@ -44,12 +44,12 @@ jobs:
         run: ./scripts/ci_build.sh
 
       - name: Build and package unsigned IPA
-        run: bash ./scripts/package_unsigned_ipa.sh "$GITHUB_WORKSPACE/build/Husk-unsigned.ipa"
+        run: bash ./scripts/package_unsigned_ipa.sh "$GITHUB_WORKSPACE/build/Stride-unsigned.ipa"
 
       - name: Upload unsigned IPA
         uses: actions/upload-artifact@v4
         with:
-          name: Husk-unsigned-IPA
-          path: build/Husk-unsigned.ipa
+          name: Stride-unsigned-IPA
+          path: build/Stride-unsigned.ipa
           if-no-files-found: error
           retention-days: 14
