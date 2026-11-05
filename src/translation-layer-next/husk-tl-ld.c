@@ -50,7 +50,7 @@ enum {
     DT_ANDROID_RELR_ = 0x6fffe000, DT_ANDROID_RELRSZ_ = 0x6fffe001,
     R_NONE = 0, R_ABS64 = 257, R_GLOB_DAT = 1025, R_JUMP_SLOT = 1026, R_RELATIVE = 1027,
     R_TLS_DTPMOD = 1028, R_TLS_DTPREL = 1029, R_TLS_TPREL = 1030, R_TLSDESC = 1031, R_IRELATIVE = 1032,
-    STB_WEAK_ = 2, STT_TLS_ = 6, STT_GNU_IFUNC_ = 10, SHN_UNDEF_ = 0,
+    STB_WEAK_ = 2, STT_TLS_ = 6, STT_GNU_IFUNC_ = 10, SHN_UNDEF_ = 0, SHN_ABS_ = 0xfff1,
     PF_X_ = 1, PF_W_ = 2, PF_R_ = 4, EM_AARCH64_ = 183,
 };
 
@@ -1866,7 +1866,16 @@ static uint64_t bind_symbol(tl_lib *L, uint32_t symidx, bool *failed)
          * wins, as it does under ELF interposition... except that a library's own
          * definition is what Android's linker uses first for its own symbols. */
         if ((s->st_info & 0xf) == STT_GNU_IFUNC_) { *failed = true; return 0; }
-        val = (uint64_t)(uintptr_t)sym_value(L, s);
+        if (s->st_shndx == SHN_ABS_) val = s->st_value;
+        else {
+            uint64_t bytes = s->st_size ? s->st_size : 1;
+            if (!image_range(L, s->st_value, bytes)) {
+                *failed = true;
+                tl_log_line("ld: %s: defined symbol %s points outside its image", L->name, name);
+                return 0;
+            }
+            val = (uint64_t)(uintptr_t)sym_value(L, s);
+        }
     } else {
         void *a = lookup_for(L, name, NULL);
         if (a) {
@@ -1987,6 +1996,25 @@ static bool do_relas(tl_lib *L, const uint8_t *table, uint64_t size, size_t *cou
     return true;
 }
 
+static bool add_u64_signed(uint64_t *value, int64_t delta)
+{
+    if (delta >= 0) {
+        if (*value > UINT64_MAX - (uint64_t)delta) return false;
+        *value += (uint64_t)delta;
+    } else {
+        uint64_t magnitude = (uint64_t)(-(delta + 1)) + 1;
+        if (*value < magnitude) return false;
+        *value -= magnitude;
+    }
+    return true;
+}
+static bool add_i64_checked(int64_t *value, int64_t delta)
+{
+    if ((delta > 0 && *value > INT64_MAX - delta) ||
+        (delta < 0 && *value < INT64_MIN - delta)) return false;
+    *value += delta;
+    return true;
+}
 typedef struct { const uint8_t *p, *end; bool bad; } sleb;
 static int64_t rd_sleb(sleb *s)
 {
@@ -2019,23 +2047,26 @@ static bool do_packed(tl_lib *L, size_t *count)
     if (!d || memcmp(d, "APS2", 4) != 0) { tl_log_line("ld: %s: packed relocations lack APS2 magic", L->name); return false; }
     sleb s = { d + 4, d + L->arelasz, false };
     int64_t total = rd_sleb(&s);
-    uint64_t r_offset = (uint64_t)rd_sleb(&s), r_info = 0;
+    int64_t first_offset = rd_sleb(&s);
+    if (s.bad || total < 0 || (uint64_t)total > L->arelasz || first_offset < 0) return false;
+    uint64_t r_offset = (uint64_t)first_offset, r_info = 0;
     int64_t r_addend = 0;
-    if (s.bad || total < 0) return false;
     enum { BY_INFO = 1, BY_DELTA = 2, BY_ADDEND = 4, HAS_ADDEND = 8 };
     for (int64_t idx = 0; idx < total;) {
         int64_t group = rd_sleb(&s), flags = rd_sleb(&s);
-        if (s.bad || group <= 0 || idx + group > total) return false;
-        uint64_t group_delta = 0;
-        if (flags & BY_DELTA) group_delta = (uint64_t)rd_sleb(&s);
+        if (s.bad || group <= 0 || group > total - idx || (flags & ~15)) return false;
+        int64_t group_delta = 0;
+        if (flags & BY_DELTA) group_delta = rd_sleb(&s);
         if (flags & BY_INFO) r_info = (uint64_t)rd_sleb(&s);
         int addend_mode = (int)(flags & (HAS_ADDEND | BY_ADDEND));
-        if (addend_mode == (HAS_ADDEND | BY_ADDEND)) r_addend += rd_sleb(&s);
+        if (addend_mode == (HAS_ADDEND | BY_ADDEND) && !add_i64_checked(&r_addend, rd_sleb(&s))) return false;
         else if (addend_mode != HAS_ADDEND) r_addend = 0;
+        if (s.bad) return false;
         for (int64_t i = 0; i < group; i++) {
-            r_offset += (flags & BY_DELTA) ? group_delta : (uint64_t)rd_sleb(&s);
+            int64_t delta = (flags & BY_DELTA) ? group_delta : rd_sleb(&s);
+            if (s.bad || !add_u64_signed(&r_offset, delta)) return false;
             if (!(flags & BY_INFO)) r_info = (uint64_t)rd_sleb(&s);
-            if (addend_mode == HAS_ADDEND) r_addend += rd_sleb(&s);
+            if (addend_mode == HAS_ADDEND && !add_i64_checked(&r_addend, rd_sleb(&s))) return false;
             if (s.bad) return false;
             if (!reloc_one(L, r_offset, (uint32_t)(r_info & 0xffffffffu), (uint32_t)(r_info >> 32), r_addend)) return false;
             (*count)++;
