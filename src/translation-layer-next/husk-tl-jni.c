@@ -296,6 +296,7 @@ static tl_jhle_fn hle_find_loose(const char *cls, const char *name, const char *
 /* Find or make the method `name`/`sig`, walking superclasses for an implementation. */
 static tl_jmeth *lookup_method(tl_jclass *cls, const char *name, const char *sig, bool is_static)
 {
+    if (!cls || !name || !sig || !*name || !*sig) return NULL;
     pthread_mutex_lock(&g_lock);
     for (int i = 0; i < cls->nmeths; i++) {
         tl_jmeth *m = cls->meths[i];
@@ -304,45 +305,70 @@ static tl_jmeth *lookup_method(tl_jclass *cls, const char *name, const char *sig
     pthread_mutex_unlock(&g_lock);
 
     /* A class the interpreter runs: its bytecode (or an intrinsic) is the method, wherever up the chain it is declared. */
-    if (tl_dvm && cls->dvm) {
-        void *dm = tl_dvm->find_method(cls, name, sig, is_static);
-        if (dm) {
-            tl_jmeth *m = calloc(1, sizeof(*m));
-            m->cls = cls; m->name = strdup(name); m->sig = strdup(sig); m->is_static = is_static;
-            m->dvm = dm; m->exists = true;
-            m->fn = hle_find(cls->name, name, sig);
-            if (!m->fn) m->fn = hle_find_loose(cls->name, name, sig);
-            parse_sig(m);
-            pthread_mutex_lock(&g_lock);
-            if (cls->nmeths == cls->capm) { cls->capm = cls->capm ? cls->capm * 2 : 8; cls->meths = realloc(cls->meths, (size_t)cls->capm * sizeof(*cls->meths)); }
-            cls->meths[cls->nmeths++] = m;
-            pthread_mutex_unlock(&g_lock);
-            return m;
+    void *dm = tl_dvm && cls->dvm ? tl_dvm->find_method(cls, name, sig, is_static) : NULL;
+    tl_jhle_fn fn = NULL;
+    bool dex_decl = false, framework = false;
+    if (!dm) {
+        /* Where could this method come from? An implementation here, the APK's DEX, or a
+         * framework class somewhere up the chain (which cannot be checked, so is believed). */
+        for (tl_jclass *c = cls; c; c = c->super) {
+            if (!fn) fn = hle_find(c->name, name, sig);
+            if (!fn) fn = hle_find_loose(c->name, name, sig);
+            if (c->in_dex) { if (!dex_decl && tl_dexidx_declares_method(c->name, name, sig, NULL)) dex_decl = true; }
+            else if (strcmp(c->name, "java/lang/Object")) framework = true;
+            else if (!strcmp(name, "<init>") || !strcmp(name, "toString") || !strcmp(name, "hashCode") || !strcmp(name, "equals")
+                     || !strcmp(name, "getClass") || !strcmp(name, "notify") || !strcmp(name, "notifyAll") || !strcmp(name, "wait")) dex_decl = true;
         }
-    }
-    /* Where could this method come from? An implementation here, the APK's DEX, or a
-     * framework class somewhere up the chain (which cannot be checked, so is believed). */
-    tl_jhle_fn fn = NULL; bool dex_decl = false, framework = false;
-    for (tl_jclass *c = cls; c; c = c->super) {
-        if (!fn) fn = hle_find(c->name, name, sig);
-        if (!fn) fn = hle_find_loose(c->name, name, sig);
-        if (c->in_dex) { if (!dex_decl && tl_dexidx_declares_method(c->name, name, sig, NULL)) dex_decl = true; }
-        else if (strcmp(c->name, "java/lang/Object")) framework = true;
-        else if (!strcmp(name, "<init>") || !strcmp(name, "toString") || !strcmp(name, "hashCode") || !strcmp(name, "equals")
-                 || !strcmp(name, "getClass") || !strcmp(name, "notify") || !strcmp(name, "notifyAll") || !strcmp(name, "wait")) dex_decl = true;
     }
     /* A class the APK defines that has a method of this name, but not with this signature, does not have
      * this method: ART says NoSuchMethodError and Unity falls back to reflection, which is what is wanted. */
     bool dex_other_sig = false;
-    if (!fn && !dex_decl) for (tl_jclass *c = cls; c; c = c->super) if (c->in_dex && tl_dexidx_method_named(c->name, name)) { dex_other_sig = true; break; }
-    bool exists = fn || dex_decl || (framework && !dex_other_sig);
+    if (!dm && !fn && !dex_decl)
+        for (tl_jclass *c = cls; c; c = c->super)
+            if (c->in_dex && tl_dexidx_method_named(c->name, name)) { dex_other_sig = true; break; }
 
     tl_jmeth *m = calloc(1, sizeof(*m));
-    m->cls = cls; m->name = strdup(name); m->sig = strdup(sig); m->is_static = is_static;
-    m->fn = fn; m->exists = exists;
+    if (!m) { tl_log_line("jni: out of memory caching method %s.%s%s", cls->name, name, sig); return NULL; }
+    m->name = strdup(name);
+    m->sig = strdup(sig);
+    if (!m->name || !m->sig) {
+        free(m->name); free(m->sig); free(m);
+        tl_log_line("jni: out of memory caching method signature %s.%s", cls->name, name);
+        return NULL;
+    }
+    m->cls = cls; m->is_static = is_static; m->dvm = dm;
+    m->fn = fn ? fn : (dm ? hle_find(cls->name, name, sig) : NULL);
+    if (!m->fn && dm) m->fn = hle_find_loose(cls->name, name, sig);
+    m->exists = dm || fn || dex_decl || (framework && !dex_other_sig);
     parse_sig(m);
+
     pthread_mutex_lock(&g_lock);
-    if (cls->nmeths == cls->capm) { cls->capm = cls->capm ? cls->capm * 2 : 8; cls->meths = realloc(cls->meths, (size_t)cls->capm * sizeof(*cls->meths)); }
+    for (int i = 0; i < cls->nmeths; i++) {
+        tl_jmeth *cached = cls->meths[i];
+        if (cached->is_static == is_static && !strcmp(cached->name, name) && !strcmp(cached->sig, sig)) {
+            pthread_mutex_unlock(&g_lock);
+            free(m->name); free(m->sig); free(m);
+            return cached;
+        }
+    }
+    if (cls->nmeths == cls->capm) {
+        int next = cls->capm ? cls->capm * 2 : 8;
+        if (next < cls->capm || (size_t)next > SIZE_MAX / sizeof(*cls->meths)) {
+            pthread_mutex_unlock(&g_lock);
+            free(m->name); free(m->sig); free(m);
+            tl_log_line("jni: method cache capacity overflow for %s", cls->name);
+            return NULL;
+        }
+        tl_jmeth **grown = realloc(cls->meths, (size_t)next * sizeof(*grown));
+        if (!grown) {
+            pthread_mutex_unlock(&g_lock);
+            free(m->name); free(m->sig); free(m);
+            tl_log_line("jni: unable to grow method cache for %s", cls->name);
+            return NULL;
+        }
+        cls->meths = grown;
+        cls->capm = next;
+    }
     cls->meths[cls->nmeths++] = m;
     pthread_mutex_unlock(&g_lock);
     return m;
