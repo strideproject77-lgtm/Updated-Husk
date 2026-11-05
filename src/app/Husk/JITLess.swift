@@ -109,7 +109,13 @@ enum JITLess {
     /// Before a game starts: no executable memory is made in this run (even when JIT is on, so the test is real), and libraries
     /// come from the dylibs. A library with no dylib cannot load, and the log says which one.
     static func prepareLaunch() {
-        guard enabled else { return }
+        guard enabled else {
+            // This process can launch more than one game. Do not let a previous
+            // JIT-less launch leave executable memory disabled for later games.
+            unsetenv("TL_NO_XMEM")
+            tl_ld_set_aot_dir(nil)
+            return
+        }
         setenv("TL_NO_XMEM", "1", 1)
         let dirs = [bundledDirectory, cacheDirectory.path].compactMap { $0 }.joined(separator: ":")
         tl_ld_set_aot_dir(dirs)
