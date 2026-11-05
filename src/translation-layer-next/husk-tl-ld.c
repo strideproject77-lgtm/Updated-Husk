@@ -457,6 +457,7 @@ static const elf_sym *lib_find(const tl_lib *L, const char *name)
         const uint8_t *g = at(L, L->gnu_hash);
         uint32_t nb, symoff, bloom_n, bloom_shift;
         memcpy(&nb, g, 4); memcpy(&symoff, g + 4, 4); memcpy(&bloom_n, g + 8, 4); memcpy(&bloom_shift, g + 12, 4);
+        if (bloom_shift >= 32) return NULL;
         uint64_t head = 16ull + (uint64_t)bloom_n * 8 + (uint64_t)nb * 4;
         if (!nb || !image_range(L, L->gnu_hash, head)) return NULL;
         const uint64_t *bloom = (const uint64_t *)(g + 16);
@@ -486,9 +487,11 @@ static const elf_sym *lib_find(const tl_lib *L, const char *name)
         uint32_t nb = t[0], nc = t[1];
         uint64_t words = 2ull + nb + nc;
         if (!nb || !image_range(L, L->sysv_hash, words * 4)) return NULL;
-        for (uint32_t i = t[2 + sysv_hash(name) % nb]; i && i < nc; i = t[2 + nb + i]) {
+        uint32_t i = t[2 + sysv_hash(name) % nb];
+        for (uint32_t steps = 0; i && i < nc && steps < nc; steps++) {
             const elf_sym *s = sym_at(L, i);
             if (s && s->st_shndx != SHN_UNDEF_ && !strcmp(sym_name(L, s), name)) return s;
+            i = t[2 + nb + i];
         }
     }
     return NULL;
@@ -1926,7 +1929,10 @@ static bool reloc_one_into(tl_lib *L, uint64_t r_offset, uint32_t type, uint32_t
     }
     case R_IRELATIVE: {
         /* The resolver is guest code: run it, store what it returns. */
-        uint64_t (*resolver)(void) = (uint64_t (*)(void))(uintptr_t)(L->rx + ((uint64_t)addend - L->base_vaddr));
+        uint64_t resolver_va = (uint64_t)addend;
+        if (resolver_va < L->base_vaddr || !image_range(L, resolver_va, 4) ||
+            !in_code(L, resolver_va)) return false;
+        uint64_t (*resolver)(void) = (uint64_t (*)(void))(uintptr_t)(L->rx + (resolver_va - L->base_vaddr));
         *place = resolver();
         return true;
     }
@@ -2084,8 +2090,10 @@ static void parse_dynamic(tl_lib *L, uint64_t dyn_vaddr, uint64_t dyn_size)
         switch (d[i].d_tag) {
         case DT_NULL_: return;
         case DT_NEEDED_:
-            if (L->nneeded >= MAX_DEPS) tl_log_line("ld: %s: too many DT_NEEDED entries (limit %d)", L->name, MAX_DEPS);
-            else L->needed[L->nneeded++] = d[i].d_val;
+            if (L->nneeded >= MAX_DEPS) {
+                L->nneeded = MAX_DEPS + 1;
+                tl_log_line("ld: %s: too many DT_NEEDED entries (limit %d)", L->name, MAX_DEPS);
+            } else if (L->nneeded <= MAX_DEPS) L->needed[L->nneeded++] = d[i].d_val;
             break;
         case DT_STRTAB_: L->strtab = d[i].d_val; break;
         case DT_STRSZ_: L->strsz = d[i].d_val; break;
@@ -3118,6 +3126,10 @@ static tl_lib *load_locked(const char *name, int depth, bool system)
     L->system = system;
 
     /* Dependencies first, so everything this library binds against exists. */
+    if (L->nneeded > MAX_DEPS) {
+        tl_log_line("ld: %s: dependency table exceeds the supported limit", name);
+        return NULL;
+    }
     for (int i = 0; i < L->nneeded; i++) {
         if (!dynstr_valid(L, L->needed[i])) {
             tl_log_line("ld: %s: DT_NEEDED[%d] has an invalid string-table offset", name, i);
