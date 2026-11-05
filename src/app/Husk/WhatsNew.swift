@@ -22,7 +22,7 @@ enum WhatsNew {
         Item(symbol: "memorychip", title: "Less \"out of memory\"",
              detail: "Fewer thread and address space crashes on sideloaded installs, and Unity games keep their frame rate up. Settings > Performance shows whether Increased Memory Limit and Extended Address Space are on."),
         Item(symbol: "globe", title: "Japanese",
-             detail: "Husk is now in Japanese too, thanks to Yuki-1018."),
+             detail: "Stride is now in Japanese too, thanks to Yuki-1018."),
         Item(symbol: "wrench.and.screwdriver.fill", title: "Fixes",
              detail: "Importing a .p12, or launching with one saved, no longer crashes on iOS 27. Remove and Uninstall open next to their buttons on iPad, and Winlator's Settings no longer crashes."),
     ]
@@ -48,7 +48,7 @@ struct WhatsNewSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 26) {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("What's New in Husk \(WhatsNew.version)").font(.largeTitle.weight(.bold))
+                        Text("What's New in Stride \(WhatsNew.version)").font(.largeTitle.weight(.bold))
                     }
                     .padding(.top, 36)
                     ForEach(WhatsNew.items) { item in
