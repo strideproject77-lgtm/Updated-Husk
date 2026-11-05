@@ -44,7 +44,7 @@ jobs:
         run: ./scripts/ci_build.sh
 
       - name: Build and package unsigned IPA
-        run: ./scripts/package_unsigned_ipa.sh "$GITHUB_WORKSPACE/build/Husk-unsigned.ipa"
+        run: bash ./scripts/package_unsigned_ipa.sh "$GITHUB_WORKSPACE/build/Husk-unsigned.ipa"
 
       - name: Upload unsigned IPA
         uses: actions/upload-artifact@v4
