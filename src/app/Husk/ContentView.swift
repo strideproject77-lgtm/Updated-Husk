@@ -481,7 +481,7 @@ struct GuestScreenView: View {
 
                         Menu {
                             Button { onBack() } label: {
-                                Label("Back to Husk", systemImage: "chevron.left")
+                                Label("Back to Stride", systemImage: "chevron.left")
                             }
                             // Android's own Home key, over the bridge. Three-button
                             // navigation is not drawn in this guest, so without it
