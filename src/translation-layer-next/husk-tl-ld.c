@@ -200,17 +200,49 @@ static char g_apk_paths[TL_LD_MAX_APKS][1024];
 
 void tl_ld_queue_split(const char *path)
 {
-    if (path && path[0] && g_nsplits < TL_LD_MAX_APKS) snprintf(g_splits[g_nsplits++], sizeof(g_splits[0]), "%s", path);
+    if (!path || !path[0]) return;
+    size_t len = strlen(path);
+    if (len >= sizeof(g_splits[0])) {
+        tl_log_line("ld: split APK path is too long (%zu bytes)", len);
+        return;
+    }
+    pthread_mutex_lock(&g_big);
+    for (int i = 0; i < g_nsplits; i++) {
+        if (!strcmp(g_splits[i], path)) {
+            pthread_mutex_unlock(&g_big);
+            return;
+        }
+    }
+    if (g_nsplits >= TL_LD_MAX_APKS) {
+        pthread_mutex_unlock(&g_big);
+        tl_log_line("ld: split APK limit (%d) reached; ignoring %s", TL_LD_MAX_APKS, path);
+        return;
+    }
+    memcpy(g_splits[g_nsplits++], path, len + 1);
+    pthread_mutex_unlock(&g_big);
 }
 
-const char *tl_ld_queued_split(int i) { return i >= 0 && i < g_nsplits ? g_splits[i] : NULL; }
+const char *tl_ld_queued_split(int i)
+{
+    pthread_mutex_lock(&g_big);
+    const char *path = i >= 0 && i < g_nsplits ? g_splits[i] : NULL;
+    pthread_mutex_unlock(&g_big);
+    return path;
+}
 /* The app's base APK, the first one added (its folder also holds what was downloaded with it: expansion files in obb/) */
 const char *tl_ld_main_apk(void) { return G.napks > 0 ? g_apk_paths[0] : NULL; }
 
 static bool add_one(const char *path)
 {
+    if (!path || !path[0] || strlen(path) >= sizeof(g_apk_paths[0])) {
+        tl_log_line("ld: invalid or overlong APK path");
+        return false;
+    }
     for (int i = 0; i < G.napks; i++) if (!strcmp(g_apk_paths[i], path)) return true;     /* already there */
-    if (G.napks >= TL_LD_MAX_APKS) return false;
+    if (G.napks >= TL_LD_MAX_APKS) {
+        tl_log_line("ld: APK limit (%d) reached; cannot add %s", TL_LD_MAX_APKS, path);
+        return false;
+    }
     char err[160];
     if (!tl_zip_open(&G.apks[G.napks], path, err, sizeof(err))) {
         tl_log_line("ld: cannot open %s: %s", path, err);
@@ -223,12 +255,18 @@ static bool add_one(const char *path)
 
 bool tl_ld_add_apk(const char *path)
 {
+    pthread_mutex_lock(&g_big);
     bool first = G.napks == 0;
-    if (!add_one(path)) return false;
+    if (!add_one(path)) {
+        pthread_mutex_unlock(&g_big);
+        return false;
+    }
     if (first)
         for (int i = 0; i < g_nsplits; i++) {
-            if (add_one(g_splits[i])) tl_log_line("ld: split %s", strrchr(g_splits[i], '/') ? strrchr(g_splits[i], '/') + 1 : g_splits[i]);
+            if (add_one(g_splits[i]))
+                tl_log_line("ld: split %s", strrchr(g_splits[i], '/') ? strrchr(g_splits[i], '/') + 1 : g_splits[i]);
         }
+    pthread_mutex_unlock(&g_big);
     return true;
 }
 
