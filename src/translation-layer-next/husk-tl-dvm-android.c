@@ -1184,6 +1184,10 @@ static void stub_lib(const char *name, uint64_t size, void *dir)
 
 bool tl_javaapp_start(const tl_javaapp_config *cfg)
 {
+    if (A.app_started || A.gl_thread_started) {
+        tl_log_line("javaapp: refusing a second launch while the previous session is active");
+        return false;
+    }
     if (!cfg || !cfg->apk_path || !cfg->apk_path[0] || !cfg->data_dir || !cfg->data_dir[0] ||
         cfg->width <= 0 || cfg->height <= 0) {
         tl_log_line("javaapp: invalid launch configuration (APK, data directory, and positive surface size are required)");
