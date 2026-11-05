@@ -1,0 +1,55 @@
+name: Unsigned iOS IPA
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: unsigned-ios-ipa-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build Husk unsigned IPA
+    runs-on: macos-15
+    timeout-minutes: 360
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          submodules: recursive
+
+      - name: Verify Xcode
+        run: |
+          xcode-select -p
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+
+      - name: Install native build tools
+        run: |
+          brew update
+          brew install meson ninja pkg-config xcodegen cmake autoconf automake libtool qemu
+
+      - name: Install Rust iOS target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios
+
+      - name: Build Husk native dependencies
+        env:
+          HUSK_SKIP_IPA_PACKAGE: "1"
+        run: ./scripts/ci_build.sh
+
+      - name: Build and package unsigned IPA
+        run: ./scripts/package_unsigned_ipa.sh "$GITHUB_WORKSPACE/build/Husk-unsigned.ipa"
+
+      - name: Upload unsigned IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: Husk-unsigned-IPA
+          path: build/Husk-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 14
