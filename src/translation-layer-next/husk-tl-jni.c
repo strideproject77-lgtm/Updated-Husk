@@ -1389,12 +1389,33 @@ tl_jfield *tl_jni_field(tl_jclass *cls, const char *name, const char *sig, bool 
 jvalue *tl_jni_field_slot(jobj *o, tl_jfield *f) { return field_slot(o, f); }
 void tl_jni_each_declared(void (*fn)(tl_jclass *jc))
 {
+    if (!fn) return;
     int cap = 8192, n = 0;
     tl_jclass **list = malloc((size_t)cap * sizeof(*list));
+    if (!list) { tl_log_line("jni: unable to allocate class snapshot"); return; }
     pthread_mutex_lock(&g_lock);
-    for (int b = 0; b < NBUCKETS; b++) for (tl_jclass *c = g_classes[b]; c; c = c->next) {
-        if (n == cap) { cap *= 2; list = realloc(list, (size_t)cap * sizeof(*list)); }
-        list[n++] = c;
+    for (int b = 0; b < NBUCKETS; b++) {
+        for (tl_jclass *c = g_classes[b]; c; c = c->next) {
+            if (n == cap) {
+                if (cap > INT_MAX / 2 || (size_t)(cap * 2) > SIZE_MAX / sizeof(*list)) {
+                    pthread_mutex_unlock(&g_lock);
+                    free(list);
+                    tl_log_line("jni: class snapshot capacity overflow");
+                    return;
+                }
+                int next = cap * 2;
+                tl_jclass **grown = realloc(list, (size_t)next * sizeof(*grown));
+                if (!grown) {
+                    pthread_mutex_unlock(&g_lock);
+                    free(list);
+                    tl_log_line("jni: unable to grow class snapshot");
+                    return;
+                }
+                list = grown;
+                cap = next;
+            }
+            list[n++] = c;
+        }
     }
     pthread_mutex_unlock(&g_lock);
     for (int i = 0; i < n; i++) fn(list[i]);
