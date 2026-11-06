@@ -57,7 +57,7 @@ enum LibraryRoute: Hashable {
     func resumeSwitch() {
         guard let id = UserDefaults.standard.string(forKey: Self.switchKey) else { return }
         UserDefaults.standard.removeObject(forKey: Self.switchKey)
-        HuskLog.log("ui", "opening \(id), which Husk was closed to switch to")
+        HuskLog.log("ui", "opening \(id), which Stride was closed to switch to")
         tab = .library
         library = id.hasPrefix("ps4:") ? [.ps4(String(id.dropFirst(4)))] : [.game(id)]
         autoPlay = id
@@ -127,7 +127,7 @@ struct AppDetailView: View {
             Section {
                 LabeledContent("Version", value: live.version ?? "—")
                 LabeledContent("Size", value: live.sizeBytes.map(Self.bytes) ?? "—")
-                LabeledContent("Last Used", value: live.lastUsed.map(Self.when) ?? "Never from Husk")
+                LabeledContent("Last Used", value: live.lastUsed.map(Self.when) ?? "Never from Stride")
             }
 
             Section {

@@ -52,25 +52,25 @@ struct AppDiagnosis: Identifiable, Equatable {
         guard let r = app.report else { return nil }
         if !r.ok || r.verdict == "unreadable" {
             return AppDiagnosis(kind: .badAPK, title: "Bad APK",
-                                detail: "This file is not an app Husk can read" + (r.error.map { ": \($0)." } ?? ".")
+                                detail: "This file is not an app Stride can read" + (r.error.map { ": \($0)." } ?? ".")
                                     + " It may be damaged, only partly downloaded, or not an Android app at all.",
                                 evidence: r.error ?? r.summary)
         }
         if r.verdict == "noArm64" {
             return AppDiagnosis(kind: .unsupportedCPU, title: "Not supported: wrong kind of CPU code",
-                                detail: r.summary + " Husk runs ARM (arm64 and 32-bit ARM translated to arm64). Look for an ARM build of this app.",
+                                detail: r.summary + " Stride runs ARM (arm64 and 32-bit ARM translated to arm64). Look for an ARM build of this app.",
                                 evidence: "ABIs: " + r.abis.joined(separator: ", "))
         }
         if app.apks.count == 1, let base = app.apks.first, husk_apk_split_required(base) != 0 {
             return AppDiagnosis(kind: .missingSplits, title: "Incomplete app",
                                 detail: "This app is published in several pieces (split APKs) and only its base was imported, so its libraries or "
-                                    + "resources are missing. Import the whole bundle (.apks, .xapk or .apkm), or get it from Husk's store.",
+                                    + "resources are missing. Import the whole bundle (.apks, .xapk or .apkm), or get it from Stride's store.",
                                 evidence: "manifest: split APKs required")
         }
         if let lib = r.libraries.first(where: { l in protectorLibraries.contains(where: { l.name.hasPrefix($0) }) }) {
             return AppDiagnosis(kind: .protected, title: "Protected app",
                                 detail: "This app carries anti-tamper protection (\(lib.name)). Such protection checks that it runs on a certified "
-                                    + "Android phone and closes the app otherwise, so it may not start in Husk.",
+                                    + "Android phone and closes the app otherwise, so it may not start in Stride.",
                                 evidence: lib.name)
         }
         return nil
@@ -86,8 +86,8 @@ struct AppDiagnosis: Identifiable, Equatable {
         // libraries, so everything after (java.lang.System failing to initialise, missing natives) follows from this
         if let l = lines.first(where: { $0.contains("no StikDebug JIT region") }) {
             return AppDiagnosis(kind: .noJIT, title: "JIT is not enabled",
-                                detail: "This iPhone only lets an app run translated code while a debugger enables JIT for it. Open Husk "
-                                    + "through StikDebug, or tap Turn On JIT in Husk, then start the app again.",
+                                detail: "This iPhone only lets an app run translated code while a debugger enables JIT for it. Open Stride "
+                                    + "through StikDebug, or tap Turn On JIT in Stride, then start the app again.",
                                 evidence: l)
         }
 
@@ -99,7 +99,7 @@ struct AppDiagnosis: Identifiable, Equatable {
         }
         if let last = left.last, last < 80 {
             return AppDiagnosis(kind: .noProgress, title: "Ran out of memory",
-                                detail: "iOS closed Husk because the game used all the memory it allows an app (\(last) MiB were left). "
+                                detail: "iOS closed Stride because the game used all the memory it allows an app (\(last) MiB were left). "
                                     + "Close other apps and try again; lower graphics settings in the game help. On SideStore or AltStore, "
                                     + "GetMoreRam raises the limit.",
                                 evidence: lines.last { $0.contains("left before jetsam") })
@@ -108,8 +108,8 @@ struct AppDiagnosis: Identifiable, Equatable {
         // The JIT region is shared: Android (QEMU) holds its top half while it runs, an app's libraries fill it from the bottom
         if let l = lines.first(where: { $0.contains("but QEMU holds its top") || $0.contains("of TCG") && $0.contains("no room for") }) {
             return AppDiagnosis(kind: .noJIT, title: "Not enough JIT memory",
-                                detail: "Android and this app share the memory Husk runs translated code in, and together they do not fit. "
-                                    + "Close Husk and open it again, then start only the app (or only Android).",
+                                detail: "Android and this app share the memory Stride runs translated code in, and together they do not fit. "
+                                    + "Close Stride and open it again, then start only the app (or only Android).",
                                 evidence: l)
         }
 
@@ -222,7 +222,7 @@ struct AppDiagnosis: Identifiable, Equatable {
                                 evidence: l)
         }
 
-        // A function of Android's C library or system libraries that was never written for Husk
+        // A function of Android's C library or system libraries that was never written for Stride
         if let l = lines.first(where: { $0.contains("CALLED an unresolved import: ") }), lines.contains(where: { $0.contains("the app finished") || $0.contains("CRASH") }) {
             let fn = l.components(separatedBy: "unresolved import: ").last?.split(separator: " ").first.map(String.init) ?? "?"
             return AppDiagnosis(kind: .missingFunction, title: "Uses something Husk does not have yet",

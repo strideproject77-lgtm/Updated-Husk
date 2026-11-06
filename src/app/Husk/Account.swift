@@ -100,7 +100,7 @@ struct AccountError: LocalizedError {
     // MARK: talking to the site
 
     private func call(_ method: String, _ path: String, body: [String: Any]? = nil, auth: Bool = true) async throws -> Data {
-        var last: Error = AccountError(message: "The Husk website did not answer.")
+        var last: Error = AccountError(message: "The account service did not answer.")
         for site in CompatibilityStore.sites {
             var r = URLRequest(url: site.appendingPathComponent(path))
             r.httpMethod = method
@@ -113,7 +113,7 @@ struct AccountError: LocalizedError {
                 guard let http = resp as? HTTPURLResponse else { continue }
                 // the site's database is down: its answer, not an outage to try the old address for
                 if CompatibilityStore.isMaintenance(http, data) { throw AccountError(message: CompatibilityStore.maintenanceMessage) }
-                if http.statusCode >= 500 { last = AccountError(message: "The Husk website had a problem (\(http.statusCode))."); continue }
+                if http.statusCode >= 500 { last = AccountError(message: "The account service had a problem (\(http.statusCode))."); continue }
                 if http.statusCode == 401, auth { forget() }
                 if http.statusCode >= 400 {
                     let msg = (try? JSONDecoder().decode(SiteError.self, from: data))?.error ?? "Something went wrong (\(http.statusCode))."
