@@ -13,7 +13,8 @@ concurrency:
 jobs:
   build:
     name: Build Stride unsigned IPA
-    runs-on: macos-15
+    # StikJIT.xcframework was built with Swift 6.4; Xcode 16.4 cannot parse its module interface.
+    runs-on: xcode-27
     timeout-minutes: 360
     steps:
       - name: Checkout main
