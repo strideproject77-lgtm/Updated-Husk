@@ -1,6 +1,5 @@
 /* Bundle display name */
-"CFBundleDisplayName" = "Husk JITヘルパー";
+"CFBundleDisplayName" = "Stride JITヘルパー";
 
 /* Bundle name */
-"CFBundleName" = "HuskJITHelper";
-
+"CFBundleName" = "StrideJITHelper";
