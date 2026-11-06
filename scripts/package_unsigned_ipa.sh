@@ -26,6 +26,7 @@ command -v ditto >/dev/null || { echo "ditto is required" >&2; exit 1; }
 command -v zip >/dev/null || { echo "zip is required" >&2; exit 1; }
 command -v unzip >/dev/null || { echo "unzip is required" >&2; exit 1; }
 
+swift "$ROOT/scripts/generate_stride_icon.swift"
 (cd "$ROOT/src/app" && xcodegen generate --quiet)
 
 echo "==> building Stride for iphoneos without Apple code signing"

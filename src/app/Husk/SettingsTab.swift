@@ -202,7 +202,7 @@ struct LibrarySettings: View {
                 .disabled(working || !host.isReady)
             } footer: {
                 Text("Names and icons come from Android's own launcher, which keeps "
-                   + "the version it draws. Re-fetching throws away Husk's copies and "
+                   + "the version it draws. Re-fetching throws away Stride's copies and "
                    + "asks again.")
             }
         }
@@ -712,7 +712,7 @@ struct JITSettings: View {
                      ? jit.automaticDescription + " Built-in StikJIT needs iOS 26, LocalDevVPN, and a "
                        + "pairing file, which Stride can make itself on iOS 27."
                      : HuskBuiltInJIT.unavailableReason ?? "Built-in StikJIT needs LocalDevVPN and a pairing "
-                       + "file, which Husk can make itself on iOS 27.")
+                       + "file, which Stride can make itself on iOS 27.")
             }
 
             Section {
@@ -767,7 +767,7 @@ struct JITSettings: View {
                    + "debugger that services trap requests, or a MAP_JIT mapping, "
                    + "which the kernel allows any debugged process. Either one is "
                    + "enough — which is available depends on the device and the iOS "
-                   + "version, so Husk tests both rather than assuming.")
+                   + "version, so Stride tests both rather than assuming.")
             }
 
             if JITBootstrap.isInstalledWithTrollStore {
@@ -1098,9 +1098,10 @@ struct AboutSettings: View {
                     Label("Open Console", systemImage: "terminal")
                 }
             } footer: {
-                Text("Stride runs unmodified Android APKs in a real Android system on your iPhone. "
-                   + "The console shows Stride's live log, the guest's serial output and QEMU's own "
-                   + "output — the three files any problem here is diagnosed from.")
+                Text("Stride is an experimental native compatibility runtime for Android apps and games on iPhone. "
+                   + "Its translation layer is still under development, so APK inspection does not guarantee a successful launch. "
+                   + "Compatibility is confirmed only after an app starts and renders on a real device. "
+                   + "The console contains Stride's live diagnostic log.")
             }
         }
         .navigationTitle("About")

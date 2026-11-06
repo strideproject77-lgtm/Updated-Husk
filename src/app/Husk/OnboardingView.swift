@@ -242,7 +242,7 @@ struct OnboardingView: View {
             HuskMark(size: 110)
             Text("Welcome to Stride")
                 .font(.system(size: 34, weight: .bold))
-            Text("Android and PS4 games, on your iPhone.")
+            Text("Android apps and games on your iPhone.")
                 .font(.title3).foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             Text("A few quick choices first. Everything here can be changed later in Settings.")
@@ -321,7 +321,7 @@ struct OnboardingView: View {
                 .padding(16)
                 .huskCard()
 
-                choice(icon: "bolt.fill", title: "Start Android When Husk Opens",
+                choice(icon: "bolt.fill", title: "Start Android When Stride Opens",
                        detail: "Off by default. The full Android emulator is experimental: starting it on launch can cause unwanted "
                              + "bugs, freezes and crashes, and slows every launch. Games and apps don't need it.",
                        isOn: $autoStart, caution: true)
@@ -361,8 +361,8 @@ struct OnboardingView: View {
     /// What the JIT page says is already in place, if anything.
     private var jitState: String? {
         if JITBootstrap.ready { return "JIT is on." }
-        if jit.method == .stikDebug { return "Husk will use StikDebug." }
-        if jit.method == .trollStore { return "Husk will use TrollStore." }
+        if jit.method == .stikDebug { return "Stride will use StikDebug." }
+        if jit.method == .trollStore { return "Stride will use TrollStore." }
         switch jit.pairingSource {
         case .onDevice: return "Paired on this device."
         case .imported: return "Pairing file imported."
@@ -440,7 +440,7 @@ struct OnboardingView: View {
     private var ask: some View {
         VStack(spacing: 18) {
             Spacer()
-            header("map.circle.fill", "Would you like a walkthrough?", "A quick look at how Husk works: where your games are, how to add more, and where the settings live.")
+            header("map.circle.fill", "Would you like a walkthrough?", "A quick look at how Stride works: where your games are, how to add more, and where the settings live.")
             Spacer()
             VStack(spacing: 12) {
                 Button("Show Me Around") {
@@ -466,18 +466,18 @@ struct OnboardingView: View {
                  text: "Your games on a shelf, the last one played first. Tap a game to pick it and its artwork fills the screen; tap it "
                      + "again, or press Play, to start it. The ⋯ button has its settings and more."),
         TourCard(symbol: "square.grid.2x2.fill", title: "Library",
-                 text: "Everything you have added, by platform. Use All, Android and PS4 to filter, search by name, and long-press any "
+                 text: "Everything you have added is listed here. Search by name and long-press any "
                      + "game for its options. The dot shows how it runs: green plays, orange opens, red is broken."),
         TourCard(symbol: "plus.circle.fill", title: "Adding Games",
-                 text: "Tap + to add an Android APK or bundle (.xapk, .apkm, .apks), or a PS4 game: a fake package (.pkg), a folder of "
-                     + "them, or an extracted game folder. You can also share files to Husk from Files or Safari."),
+                 text: "Tap + to add an Android APK or bundle (.xapk, .apkm, .apks). You can also add compatible files shared from "
+                     + "Files or Safari."),
         TourCard(symbol: "cart.fill", title: "Store",
-                 text: "Browse and download Android apps from Google Play, with a guest account or your own, and see how each runs in Husk."),
+                 text: "Browse and download Android apps from Google Play, with a guest account or your own, and see how each runs in Stride."),
         TourCard(symbol: "bolt.fill", title: "Settings & JIT",
                  text: "Games need JIT, or Play without JIT with a certificate. Both are in Settings. Settings also has performance, appearance, "
-                     + "input, and the optional full Android emulator."),
+                     + "input and runtime diagnostics."),
         TourCard(symbol: "questionmark.circle.fill", title: "Help",
-                 text: "Stuck? Settings › Help answers the common problems, and a game that crashes Husk leaves a report to share."),
+                 text: "Stuck? Settings › Help answers the common problems, and a game that crashes Stride leaves a report to share."),
     ]
 
     private func tourCard(_ card: TourCard) -> some View {
