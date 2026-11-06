@@ -97,12 +97,12 @@ extension TLReport {
         let flagged = libraries.filter { ($0.abi == "arm64-v8a" || $0.abi == "armeabi-v7a" || $0.abi == "armeabi") && $0.status != "ok" }.count
         let total = libraries.filter { $0.abi == "arm64-v8a" || $0.abi == "armeabi-v7a" || $0.abi == "armeabi" }.count
         var text = nativeEngine == .flutter
-            ? "Detected a Flutter app. Husk will try its native Flutter driver and load its \(total) arm64 libraries; this scan does not prove the app will start."
+            ? "Detected a Flutter app. Stride will try its native Flutter driver and load its \(total) arm64 libraries; this scan does not prove the app will start."
             : nativeEngine == .java && engine != "libGDX"
-            ? "Detected an Android app. Husk will try its Dalvik/Java driver" + (total > 0 ? " and its native library loader for \(total) arm64 libraries." : ".") + " The bundled Java runtime is required."
-            : "Detected a \(nativeEngineName) game. Husk has a native driver for this engine and will try to load its \(total) arm64 libraries; this scan does not prove the game will start."
-        if nativeEngine == .cocos || nativeEngine == .minecraft || nativeEngine == .ue4 || nativeEngine == .gta { text += " It is a landscape game: Husk turns the screen for it." }
-        else if nativeEngine == .sdl || nativeEngine == .nativeactivity || nativeEngine == .godot || nativeEngine == .gamemaker { text += " Husk turns the screen the way the game asks for." }
+            ? "Detected an Android app. Stride will try its Dalvik/Java driver" + (total > 0 ? " and its native library loader for \(total) arm64 libraries." : ".") + " The bundled Java runtime is required."
+            : "Detected a \(nativeEngineName) game. Stride has a native driver for this engine and will try to load its \(total) arm64 libraries; this scan does not prove the game will start."
+        if nativeEngine == .cocos || nativeEngine == .minecraft || nativeEngine == .ue4 || nativeEngine == .gta { text += " It is a landscape game: Stride turns the screen for it." }
+        else if nativeEngine == .sdl || nativeEngine == .nativeactivity || nativeEngine == .godot || nativeEngine == .gamemaker { text += " Stride turns the screen the way the game asks for." }
         if flagged > 0 {
             text += " The static scanner flagged \(flagged) native libraries; the launch driver may still refuse them if a required import, relocation, or runtime feature is unsupported."
         }
@@ -299,7 +299,7 @@ final class TranslationLayerStore: ObservableObject {
                                                                       options: [.skipsHiddenFiles])) ?? [])
             .filter { $0.pathExtension.lowercased() == "apk" || BundleUnpacker.extensions.contains($0.pathExtension.lowercased()) }
         guard let first = dropped.first else { return }
-        HuskLog.log("tl", "adopting \(dropped.count) APK(s) found in the Husk folder")
+        HuskLog.log("tl", "adopting \(dropped.count) APK(s) found in the Stride folder")
         add([first], move: true)
     }
 
@@ -397,7 +397,7 @@ final class TranslationLayerStore: ObservableObject {
         } catch {
             try? fm.removeItem(at: dir)
             HuskLog.log("tl", "FAILED to add: \(error.localizedDescription)")
-            return "Husk could not copy it: \(error.localizedDescription)"
+            return "Stride could not copy it: \(error.localizedDescription)"
         }
 
         let apks = orderedAPKs(((try? fm.contentsOfDirectory(atPath: dir.path)) ?? [])

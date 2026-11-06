@@ -13,7 +13,7 @@ extension TLReport {
     var runnerName: String {
         if runsOnNativeRuntime { return nativeEngineName }
         if let web = webKind { return "\(web.name) (web app)" }
-        return canRun ? "Java (Husk's interpreter)" : "None"
+        return canRun ? "Java (Stride's interpreter)" : "None"
     }
 }
 
@@ -89,7 +89,7 @@ struct TLTechnicalView: View {
                 } header: {
                     Text("Native Libraries (\(arm64.count))")
                 } footer: {
-                    Text("How each 64-bit library maps onto the iPhone: its relocations, the instructions Husk rewrites, and anything the loader works around.")
+                    Text("How each 64-bit library maps onto the iPhone: its relocations, the instructions Stride rewrites, and anything the loader works around.")
                 }
             }
 

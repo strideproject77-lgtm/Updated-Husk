@@ -50,8 +50,8 @@ final class SigningCertificate: ObservableObject {
             return
         }
         if let team = Self.installedTeamID, team != opened.info.teamID {
-            lastError = "This certificate belongs to team \(opened.info.teamID), but Husk was installed with team \(team). "
-                      + "Use the certificate of the Apple ID that installed Husk."
+            lastError = "This certificate belongs to team \(opened.info.teamID), but Stride was installed with team \(team). "
+                      + "Use the certificate of the Apple ID that installed Stride."
             return
         }
         guard Self.store(data, opened.password) else { lastError = "The certificate could not be saved in the Keychain."; return }

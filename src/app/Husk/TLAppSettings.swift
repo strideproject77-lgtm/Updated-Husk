@@ -176,7 +176,7 @@ struct TLAppSettingsView: View {
                 }
                 .padding(.vertical, 2)
             } footer: {
-                Text("What the game is called in Husk. The game itself is not changed.")
+                Text("What the game is called in Stride. The game itself is not changed.")
             }
 
             Section {
@@ -192,7 +192,7 @@ struct TLAppSettingsView: View {
                 Text("Display")
             } footer: {
                 Text("\(settings.resolution.detail) Orientation and resolution apply the next time the game starts, and a game already "
-                   + "running in this session needs Husk closed and opened again.")
+                   + "running in this session needs Stride closed and opened again.")
             }
 
             Section {
@@ -204,8 +204,8 @@ struct TLAppSettingsView: View {
             } header: {
                 Text("Multitasking")
             } footer: {
-                Text("In a window, \(app.label) runs over Husk: move it by its title bar, resize it from the corner, and minimise it to "
-                   + "the dock at the edge of the screen while you use the rest of Husk.")
+                Text("In a window, \(app.label) runs over Stride: move it by its title bar, resize it from the corner, and minimise it to "
+                   + "the dock at the edge of the screen while you use the rest of Stride.")
             }
 
             Section {
@@ -224,7 +224,7 @@ struct TLAppSettingsView: View {
                 } header: {
                     Text("Mods")
                 } footer: {
-                    Text("Geode is the mod loader for Geometry Dash. With it on, Husk downloads Geode for this version of the "
+                    Text("Geode is the mod loader for Geometry Dash. With it on, Stride downloads Geode for this version of the "
                        + "game, and mods are found and installed in the game itself, from Geode's button on the main menu. "
                        + "Applies the next time the game starts.")
                 }
@@ -255,7 +255,7 @@ struct TLAppSettingsView: View {
             } header: {
                 Text("Home Screen")
             } footer: {
-                Text("Puts \(app.label) on your Home Screen with its own icon. Tapping it opens Husk straight into the game. Husk "
+                Text("Puts \(app.label) on your Home Screen with its own icon. Tapping it opens Stride straight into the game. Stride "
                    + "downloads a profile: open Settings, tap Profile Downloaded, then Install.")
             }
 
@@ -268,7 +268,7 @@ struct TLAppSettingsView: View {
             } header: {
                 Text("Data")
             } footer: {
-                Text(inUse ? "The game is loaded in this session. Close Husk completely and open it again to reset its data."
+                Text(inUse ? "The game is loaded in this session. Close Stride completely and open it again to reset its data."
                            : "Deletes what the game saved and downloaded here: saves, settings and caches. The game itself stays.")
             }
         }

@@ -264,7 +264,7 @@ final class TLUnityUIView: UIView, UIKeyInput {
                 if engine == .java { attachWebHost(fresh: false) }
                 return
             }
-            HuskLog.log("tl", "native: \(loaded ?? "another app") is still loaded; close Husk to start \(apk)")
+            HuskLog.log("tl", "native: \(loaded ?? "another app") is still loaded; close Stride to start \(apk)")
             return
         }
         // The game plays through the silent switch, like the guest's own audio, and mixes with other audio. Unity games too:
