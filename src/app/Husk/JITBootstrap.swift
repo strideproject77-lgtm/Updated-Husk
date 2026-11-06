@@ -103,7 +103,7 @@ enum JITBootstrap {
             if husk_ios_jit_prewarm_self(jitBytes) {
                 prewarmed = true
                 lastFailure = nil
-                HuskLog.log("jit", "JIT region made by Husk itself (\(husk_ios_jit_self_route().map { String(cString: $0) } ?? "self"))")
+                HuskLog.log("jit", "JIT region made by Stride itself (\(husk_ios_jit_self_route().map { String(cString: $0) } ?? "self"))")
                 return true
             }
             releaseUnusedCompressedHeap()
@@ -130,7 +130,7 @@ enum JITBootstrap {
             lastFailure = "The debugger is attached but is not answering trap "
                         + "requests, and this device will not execute a MAP_JIT "
                         + "mapping either, so no executable memory could be "
-                        + "claimed. This is what happens when Husk runs inside "
+                        + "claimed. This is what happens when Stride runs inside "
                         + "another container app rather than sideloaded on its own."
         }
         HuskLog.log("jit", ok ? "JIT region secured; it will be handed to QEMU later"
@@ -370,7 +370,7 @@ enum JITBootstrap {
         // checked against whichever app iOS actually installed — a container app hosting Husk
         // fails the query even when StikDebug is installed. open() has no such restriction.
         HuskLog.log("jit", "opening stikjit:// for bundle \(bundleID), pid \(getpid()); "
-                         + "Husk will be backgrounded and relaunched after attach")
+                         + "Stride will be backgrounded and relaunched after attach")
         UIApplication.shared.open(launchURL, options: [:]) { success in
             if !success {
                 HuskLog.log("jit", "FAIL: open(stikjit://) did not succeed -- StikDebug is not installed")

@@ -245,7 +245,7 @@ final class WebAppRuntime: NSObject {
         case ("StatusBar", _), ("SplashScreen", _), ("Keyboard", _):
             ok()
         default:
-            fail("\(plugin).\(method) is not implemented in Husk")
+            fail("\(plugin).\(method) is not implemented in Stride")
         }
     }
 

@@ -93,7 +93,7 @@ final class AppUpdates: ObservableObject {
 
     @Published var available: Release?
 
-    private static let api = URL(string: "https://api.github.com/repos/Leviidev/Husk/releases/latest")!
+    private static let api = URL(string: "https://api.github.com/repos/Leviidev/Stride/releases/latest")!
     private static let checkedKey = "husk.updates.checked", dismissedKey = "husk.updates.dismissed"
 
     static var current: String { Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0" }
@@ -103,7 +103,7 @@ final class AppUpdates: ObservableObject {
         if Date().timeIntervalSince1970 - d.double(forKey: Self.checkedKey) < 12 * 3600 { return }
         var req = URLRequest(url: Self.api)
         req.timeoutInterval = 20
-        req.setValue("Husk", forHTTPHeaderField: "User-Agent")
+        req.setValue("Stride", forHTTPHeaderField: "User-Agent")
         guard let (data, response) = try? await URLSession.shared.data(for: req),
               (response as? HTTPURLResponse)?.statusCode == 200,
               let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
@@ -112,7 +112,7 @@ final class AppUpdates: ObservableObject {
         d.set(Date().timeIntervalSince1970, forKey: Self.checkedKey)
         let version = tag.hasPrefix("v") ? String(tag.dropFirst()) : tag
         guard Self.newer(version, than: Self.current), d.string(forKey: Self.dismissedKey) != version else { return }
-        HuskLog.log("update", "Husk \(version) is out (this is \(Self.current))")
+        HuskLog.log("update", "Stride \(version) is out (this is \(Self.current))")
         available = Release(version: version, page: page)
     }
 
