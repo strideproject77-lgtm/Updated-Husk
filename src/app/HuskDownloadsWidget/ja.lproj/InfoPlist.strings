@@ -1,6 +1,5 @@
 /* Bundle display name */
-"CFBundleDisplayName" = "Husk ダウンロード";
+"CFBundleDisplayName" = "Stride ダウンロード";
 
 /* Bundle name */
-"CFBundleName" = "HuskDownloadsWidget";
-
+"CFBundleName" = "StrideDownloadsWidget";
