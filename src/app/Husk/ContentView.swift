@@ -155,7 +155,7 @@ struct ContentView: View {
             WhatsNewSheet { WhatsNew.markSeen(); showWhatsNew = false }
         }
         // A newer Husk is on GitHub.
-        .alert("Husk \(updates.available?.version ?? "") Is Available", isPresented: Binding(
+        .alert("Stride \(updates.available?.version ?? "") Is Available", isPresented: Binding(
                 get: { updates.available != nil && !showOnboarding && !showWhatsNew && crash.pending == nil },
                 set: { if !$0 { updates.dismiss() } })) {
             Button("View Release") {
@@ -297,7 +297,7 @@ struct ContentView: View {
             return
         }
         guard !AutoStart.lastOneDied() else {
-            HuskLog.log("ui", "Husk closed while starting Android on launch last time; not starting it on its own this time")
+            HuskLog.log("ui", "Stride closed while starting Android on launch last time; not starting it on its own this time")
             return
         }
         HuskLog.log("ui", "starting Android on launch")
@@ -351,7 +351,7 @@ struct ContentView: View {
                                  + "answering and MAP_JIT does not execute here")
                 // Said on screen too: a Start button that silently does nothing reads as a hang (#122).
                 host.say("Android can't start without JIT",
-                         JITBootstrap.lastFailure ?? "Husk could not get executable memory. Turn JIT on again (Settings > JIT) and retry.",
+                         JITBootstrap.lastFailure ?? "Stride could not get executable memory. Turn JIT on again (Settings > JIT) and retry.",
                          good: false)
                 booting = false
                 return
@@ -361,7 +361,7 @@ struct ContentView: View {
         }
         // A PS4 game started in this run holds the same JIT region QEMU would take.
         if let console = husk_console_loaded_game() {
-            HuskLog.log("jit", "refusing to start QEMU: \(String(cString: console)) is loaded in this run; close Husk first")
+            HuskLog.log("jit", "refusing to start QEMU: \(String(cString: console)) is loaded in this run; close Stride first")
             return
         }
         started = true

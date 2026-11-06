@@ -13,7 +13,7 @@ enum BundleUnpacker {
         case notAZip, unsupported(String)
         var errorDescription: String? {
             switch self {
-            case .notAZip: return "That file is not a bundle Husk can read."
+            case .notAZip: return "That file is not a bundle Stride can read."
             case .unsupported(let why): return why
             }
         }
@@ -128,7 +128,7 @@ enum BundleUnpacker {
             let lower = base.lowercased()
             let isOBB = lower.hasSuffix(".obb")
             guard lower.hasSuffix(".apk") || isOBB, !name.hasSuffix("/"), !base.hasPrefix(".") else { continue }
-            guard method == 0 || method == 8 else { throw Failure.unsupported("\(base) is packed in a way (zip method \(method)) Husk cannot unpack.") }
+            guard method == 0 || method == 8 else { throw Failure.unsupported("\(base) is packed in a way (zip method \(method)) Stride cannot unpack.") }
 
             // The local header has its own name and extra lengths; the data follows them.
             try file.seek(toOffset: localOffset)
