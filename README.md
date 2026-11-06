@@ -4,40 +4,44 @@
 
 <h1 align="center">Stride</h1>
 
-<p align="center">Android apps and games on iPhone.</p>
+<p align="center">Run Android apps and games on iPhone through a native compatibility runtime.</p>
 
-<p align="center">
-  <strong>Experimental native translation runtime · QEMU fallback</strong>
-</p>
+<p align="center"><strong>Experimental Android translation layer for iOS</strong></p>
 
-Stride is developed from the open-source <a href="https://github.com/Leviidev/Husk">Husk</a> codebase. This repository has its own development history and branding.
+Stride is an independent project built by modifying and extending the open-source Husk codebase. The app, product identity, interface and ongoing development are branded as **Stride**. Original upstream copyright notices and third-party licence terms remain preserved in the source tree.
 
-## Runtime
+## What Stride is
 
-- **Native translation layer** — engine-specific drivers, a native Android library loader, JNI/Bionic compatibility and a Dalvik/DEX runtime.
-- **Android guest** — QEMU-based Android environment for workloads that need a full guest.
-- **PS4 support** — experimental console components remain part of the source tree.
+Stride is an experimental iOS runtime that aims to load Android application packages and translate the Android software interfaces they depend on into native iOS-compatible services.
 
-An APK scan only identifies likely engines and native libraries. It does **not** guarantee that an app will launch. Compatibility is confirmed only when the app starts and renders frames on a real device.
+Current development areas include:
+
+- **DEX execution:** Java bytecode loading, runtime dispatch and Android application startup.
+- **Android compatibility:** framework APIs, resources, package metadata, intents and services.
+- **Native compatibility:** JNI, Bionic interfaces, ELF loading and native symbol resolution.
+- **Graphics:** translating Android graphics workloads to iOS graphics APIs.
+- **Input and audio:** touch, controller, sound and device integration.
+
+Compatibility is not guaranteed by APK scanning or successful installation. A game is considered working only after it launches and renders correctly on a real device.
 
 ## Build
 
-On macOS with Xcode, install the native build tools and Rust iOS target, then run:
+Build on macOS with Xcode and the required native build tools:
 
 ```sh
 ./scripts/ci_build.sh
 ```
 
-The standard build output is `build/Stride.ipa`.
+The standard output is `build/Stride.ipa`.
 
-The manual unsigned builder is available in **Actions → Unsigned iOS IPA**. It produces a `Stride-unsigned.ipa` artifact when the build succeeds.
+For an unsigned CI build, open **Actions → Unsigned iOS IPA** and run the workflow on `main`. A successful run uploads the `Stride-unsigned-IPA` artifact.
 
-## Important build notes
+## Compatibility and limitations
 
-The app's Java translation path requires the bundled `build/java-runtime` assets. Android system fonts and certificates are staged from `build/android-system`. A build that omits these assets may still compile, but some Android apps will not start correctly.
+Stride is experimental. Some Android APIs, native libraries, graphics paths and games are not implemented yet. Check the project documentation and test reports for verified status; do not treat planned features as completed.
 
-The app keeps the existing `com.husk.app` bundle identifier and `husk://` URL scheme for upgrade and sideload-callback compatibility while the visible product name is Stride.
+The existing `com.husk.app` bundle identifier and `husk://` URL scheme are intentionally retained during this transition so an update can preserve installation and sideload callback compatibility. They are internal compatibility identifiers, not the displayed product name.
 
-## Licence
+## Licence and upstream attribution
 
-GPL-2.0-or-later. See [LICENSE](LICENSE) and [docs/01-licensing.md](docs/01-licensing.md).
+Stride contains modified code derived from **Husk** by Leviidev and contributors. The applicable project licence is **GPL-2.0-or-later**; see [LICENSE](LICENSE) and [docs/01-licensing.md](docs/01-licensing.md). Original copyright notices and all bundled third-party notices must remain with the source and distributed builds. This project is not the original upstream Husk release.
