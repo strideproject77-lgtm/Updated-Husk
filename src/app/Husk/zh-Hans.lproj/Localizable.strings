@@ -1,13 +1,13 @@
-/* Husk, Simplified Chinese. Keys are the English text as written in the Swift sources. */
+/* Stride, Simplified Chinese. Keys are the English text as written in the Swift sources. */
 
-"%@ and more, running on your iPhone with Husk." = "%@ 等更多应用，用 Husk 在你的 iPhone 上运行。";
+"%@ and more, running on your iPhone with Stride." = "%@ 等更多应用，用 Stride 在你的 iPhone 上运行。";
 "%@ free on this device." = "本设备可用空间 %@。";
-"%@ has been started in this run of Husk. Close Husk and open it again to restore saves." = "%@ 已在本次运行中启动过。请完全关闭 Husk 后重新打开，再恢复存档。";
-"%@ is still loaded and only one game can run per session. Husk closes; open it again and %@ starts by itself." = "%1$@ 仍在运行，每次只能运行一个游戏。Husk 将关闭；重新打开后 %2$@ 会自动启动。";
+"%@ has been started in this run of Stride. Close Stride and open it again to restore saves." = "%@ 已在本次运行中启动过。请完全关闭 Stride 后重新打开，再恢复存档。";
+"%@ is still loaded and only one game can run per session. Stride closes; open it again and %@ starts by itself." = "%1$@ 仍在运行，每次只能运行一个游戏。Stride 将关闭；重新打开后 %2$@ 会自动启动。";
 "%@ of %@" = "%1$@ / %2$@";
 "%@ opens by itself once Android has started." = "安卓启动后，%@ 会自动打开。";
-"%@ was started in this session, and a game cannot be unloaded once it has started. Close Husk completely and open it again to run %@." = "%1$@ 已在本次运行中启动，游戏启动后无法卸载。请完全关闭 Husk 后重新打开以运行 %2$@。";
-"%@ was started in this session. Close Husk completely and open it again to run %@." = "%1$@ 已在本次运行中启动。请完全关闭 Husk 后重新打开以运行 %2$@。";
+"%@ was started in this session, and a game cannot be unloaded once it has started. Close Stride completely and open it again to run %@." = "%1$@ 已在本次运行中启动，游戏启动后无法卸载。请完全关闭 Stride 后重新打开以运行 %2$@。";
+"%@ was started in this session. Close Stride completely and open it again to run %@." = "%1$@ 已在本次运行中启动。请完全关闭 Stride 后重新打开以运行 %2$@。";
 "%@, minimised" = "%@（已最小化）";
 "%lld" = "%lld";
 "%lld Downloading" = "%lld 个正在下载";
@@ -17,8 +17,8 @@
 "%lld%%" = "%lld%%";
 "720" = "720";
 "1280" = "1280";
-"A backup is a .zip of everything %@ has saved in Husk, to keep in Files or move to another device." = "备份是 %@ 在 Husk 中保存的全部内容的 .zip 文件，可保存在“文件”中或移到另一台设备。";
-"A direct link to an APK, a bundle or a zip. It shows in Downloads, then Husk asks where it goes." = "APK、应用包或 zip 的直接链接。它会出现在“下载”中，之后 Husk 会询问放到哪里。";
+"A backup is a .zip of everything %@ has saved in Stride, to keep in Files or move to another device." = "备份是 %@ 在 Stride 中保存的全部内容的 .zip 文件，可保存在“文件”中或移到另一台设备。";
+"A direct link to an APK, a bundle or a zip. It shows in Downloads, then Stride asks where it goes." = "APK、应用包或 zip 的直接链接。它会出现在“下载”中，之后 Stride 会询问放到哪里。";
 "A few quick choices first. Everything here can be changed later in Settings." = "先做几个简单的选择。这里的所有设置以后都可以在“设置”中更改。";
 "A new look, PS4 games, and hundreds more Android games." = "全新外观、PS4 游戏，以及数百款新的安卓游戏。";
 "ANDROID" = "安卓";
@@ -34,7 +34,7 @@
 "Add a Game or App" = "添加游戏或应用";
 "Add a game or app" = "添加游戏或应用";
 "Add a link to an APK or a file, or the address a computer gives you when it shares a folder." = "添加 APK 或文件的链接，或电脑共享文件夹时给出的地址。";
-"Add to Husk" = "添加到 Husk";
+"Add to Stride" = "添加到 Stride";
 "Add your first game" = "添加你的第一个游戏";
 "After playing, once per game per update" = "游玩之后，每个游戏每次更新一次";
 "An APK is added to your library when it finishes. Anything else goes into the Shared Storage folder, which games see as their phone storage." = "APK 下载完成后会加入你的游戏库。其他文件会放入“共享存储”文件夹，游戏会把它当作手机存储。";
@@ -42,7 +42,7 @@
 "Android App Info" = "安卓应用信息";
 "Android Emulator" = "安卓模拟器";
 "Android and PS4 games, on your iPhone." = "安卓和 PS4 游戏，就在你的 iPhone 上。";
-"Android and Translation Layer games need JIT. StikJIT, built into Husk, turns it on without a computer." = "安卓和转译层游戏需要 JIT。Husk 内置的 StikJIT 无需电脑即可开启。";
+"Android and Translation Layer games need JIT. StikJIT, built into Stride, turns it on without a computer." = "安卓和转译层游戏需要 JIT。Stride 内置的 StikJIT 无需电脑即可开启。";
 "Android installs it from where it already is — nothing is copied." = "安卓会直接从原位置安装，不会复制任何内容。";
 "Android will boot from cold once, then save a new one." = "安卓会冷启动一次，然后保存新的快照。";
 "Anonymous" = "匿名";
@@ -57,8 +57,8 @@
 "Attach the sound device" = "连接声音设备";
 "Back" = "返回";
 "Back Up Saves" = "备份存档";
-"Back to Husk" = "返回 Husk";
-"Boots the guest as soon as Husk opens, when JIT is available." = "有 JIT 时，Husk 一打开就启动客机系统。";
+"Back to Stride" = "返回 Stride";
+"Boots the guest as soon as Stride opens, when JIT is available." = "有 JIT 时，Stride 一打开就启动客机系统。";
 "Both sides must be between 240 and 2560." = "宽和高都必须在 240 到 2560 之间。";
 "Browse Files" = "浏览文件";
 "Browse and download apps using an anonymous Aurora guest account, or sign in with your Google account." = "使用匿名 Aurora 访客账户浏览和下载应用，或用你的 Google 账户登录。";
@@ -76,8 +76,8 @@
 "Clear" = "清除";
 "Clear Finished" = "清除已完成";
 "Close" = "关闭";
-"Close Husk" = "关闭 Husk";
-"Close Husk?" = "关闭 Husk？";
+"Close Stride" = "关闭 Stride";
+"Close Stride?" = "关闭 Stride？";
 "Compatibility" = "兼容性";
 "Compatibility List" = "兼容性列表";
 "Connecting to Google Play…" = "正在连接 Google Play…";
@@ -91,7 +91,7 @@
 "Could Not Load" = "无法加载";
 "Crash Report" = "崩溃报告";
 "Create Account" = "创建账户";
-"Create a Husk Account" = "创建 Husk 账户";
+"Create a Stride Account" = "创建 Stride 账户";
 "Create an account" = "创建账户";
 "Custom" = "自定义";
 "Custom Colour" = "自定义颜色";
@@ -117,8 +117,8 @@
 "Downloads" = "下载";
 "Drag a control to move it, or tap one to resize or hide it." = "拖动控件可移动，点按可调整大小或隐藏。";
 "Drop an APK file here" = "把 APK 文件拖到这里";
-"Each app is played once JIT is on, watched for 15 seconds, and written down; then Husk closes. Open Husk again for the next one. At the end the results file is offered to share." = "开启 JIT 后逐个运行每个应用，观察 15 秒并记录结果，然后 Husk 关闭。重新打开 Husk 运行下一个。结束后会提供结果文件供分享。";
-"Each time Husk opens without JIT, it asks TrollStore to turn it on. TrollStore's URL Scheme setting must be on." = "每次 Husk 在没有 JIT 的情况下打开时，都会请 TrollStore 开启 JIT。需要打开 TrollStore 的 URL Scheme 设置。";
+"Each app is played once JIT is on, watched for 15 seconds, and written down; then Stride closes. Open Stride again for the next one. At the end the results file is offered to share." = "开启 JIT 后逐个运行每个应用，观察 15 秒并记录结果，然后 Stride 关闭。重新打开 Stride 运行下一个。结束后会提供结果文件供分享。";
+"Each time Stride opens without JIT, it asks TrollStore to turn it on. TrollStore's URL Scheme setting must be on." = "每次 Stride 在没有 JIT 的情况下打开时，都会请 TrollStore 开启 JIT。需要打开 TrollStore 的 URL Scheme 设置。";
 "Edit Profile" = "编辑资料";
 "Edit pad" = "编辑手柄";
 "Enable JIT" = "开启 JIT";
@@ -156,13 +156,13 @@
 "Home Screen" = "主屏幕";
 "How did %@ run?" = "%@ 运行得怎么样？";
 "How does %@ run?" = "%@ 运行得怎么样？";
-"How each 64-bit library maps onto the iPhone: its relocations, the instructions Husk rewrites, and anything the loader works around." = "每个 64 位库如何映射到 iPhone：它的重定位、Husk 改写的指令，以及加载器绕过的问题。";
+"How each 64-bit library maps onto the iPhone: its relocations, the instructions Stride rewrites, and anything the loader works around." = "每个 64 位库如何映射到 iPhone：它的重定位、Stride 改写的指令，以及加载器绕过的问题。";
 "How it connects" = "连接方式";
 "How it works" = "工作原理";
-"Husk" = "Husk";
-"Husk %@" = "Husk %@";
-"Husk %@ Is Available" = "Husk %@ 已推出";
-"Husk was marked as debugged when it opened, so JIT is on." = "Husk 打开时已被标记为调试中，因此 JIT 已开启。";
+"Stride" = "Stride";
+"Stride %@" = "Stride %@";
+"Stride %@ Is Available" = "Stride %@ 已推出";
+"Stride was marked as debugged when it opened, so JIT is on." = "Stride 打开时已被标记为调试中，因此 JIT 已开启。";
 "I already have an account" = "我已有账户";
 "Import" = "导入";
 "Import APK" = "导入 APK";
@@ -192,11 +192,11 @@
 "Last test: %lld of %lld done." = "上次测试：已完成 %1$lld / %2$lld。";
 "Launch" = "启动";
 "Library" = "游戏库";
-"Live Activities are off for Husk, so downloads don't show on the Lock Screen or in the Dynamic Island. Turn them on in Settings › Husk › Live Activities." = "Husk 的实时活动已关闭，因此下载不会显示在锁定屏幕或灵动岛上。请在“设置”›“Husk”›“实时活动”中打开。";
+"Live Activities are off for Stride, so downloads don't show on the Lock Screen or in the Dynamic Island. Turn them on in Settings › Stride › Live Activities." = "Stride 的实时活动已关闭，因此下载不会显示在锁定屏幕或灵动岛上。请在“设置”›“Stride”›“实时活动”中打开。";
 "Loading Google Sign-In…" = "正在加载 Google 登录…";
 "Log" = "日志";
 "Logs" = "日志";
-"Make a folder named DeveloperTesting in Husk's folder (Files > On My iPhone > Husk) and put the APKs to test in it: an APK each, or a folder per app with its base and split APKs." = "在 Husk 的文件夹（文件 > 我的 iPhone > Husk）中新建名为 DeveloperTesting 的文件夹，并把要测试的 APK 放进去：每个应用一个 APK，或每个应用一个包含基础 APK 和拆分 APK 的文件夹。";
+"Make a folder named DeveloperTesting in Stride's folder (Files > On My iPhone > Stride) and put the APKs to test in it: an APK each, or a folder per app with its base and split APKs." = "在 Stride 的文件夹（文件 > 我的 iPhone > Stride）中新建名为 DeveloperTesting 的文件夹，并把要测试的 APK 放进去：每个应用一个 APK，或每个应用一个包含基础 APK 和拆分 APK 的文件夹。";
 "Manage Repositories" = "管理软件源";
 "Mass Test" = "批量测试";
 "Menu" = "菜单";
@@ -222,7 +222,7 @@
 "Not yet" = "还没有";
 "Notes" = "备注";
 "Nothing here is called “%@”." = "没有叫“%@”的内容。";
-"Nothing matches “%@”. Open Settings › About › Open Console to see what Husk is doing." = "没有匹配“%@”的内容。打开“设置”›“关于”›“打开控制台”查看 Husk 正在做什么。";
+"Nothing matches “%@”. Open Settings › About › Open Console to see what Stride is doing." = "没有匹配“%@”的内容。打开“设置”›“关于”›“打开控制台”查看 Stride 正在做什么。";
 "Now" = "现在";
 "OK" = "好";
 "On-screen controller" = "屏幕手柄";
@@ -313,7 +313,7 @@
 "See All" = "查看全部";
 "Select File" = "选择文件";
 "Send" = "发送";
-"Sent with it: %@, iOS %@, Husk build %@, JIT from %@. It shows on itslevii.dev for everyone." = "一同发送：%1$@、iOS %2$@、Husk 版本 %3$@、JIT 来自 %4$@。它会在 itslevii.dev 上对所有人显示。";
+"Sent with it: %@, iOS %@, Stride build %@, JIT from %@. It shows on itslevii.dev for everyone." = "一同发送：%1$@、iOS %2$@、Stride 版本 %3$@、JIT 来自 %4$@。它会在 itslevii.dev 上对所有人显示。";
 "Set Up StikJIT Now" = "立即设置 StikJIT";
 "Set up JIT" = "设置 JIT";
 "Settings" = "设置";
@@ -328,7 +328,7 @@
 "Shows the window again" = "重新显示窗口";
 "Sideloading" = "侧载";
 "Sign In" = "登录";
-"Sign In to Husk" = "登录 Husk";
+"Sign In to Stride" = "登录 Stride";
 "Sign In with Google" = "用 Google 登录";
 "Sign Out" = "退出登录";
 "Sign in with Google" = "用 Google 登录";
@@ -340,7 +340,7 @@
 "Start Android to uninstall or look inside the app." = "启动安卓以卸载或查看应用内容。";
 "Start Android?" = "启动安卓？";
 "Start Mass Test" = "开始批量测试";
-"Start Using Husk" = "开始使用 Husk";
+"Start Using Stride" = "开始使用 Stride";
 "Start pairing" = "开始配对";
 "Starting %@…" = "正在启动 %@…";
 "Starting Android…" = "正在启动安卓…";
@@ -351,20 +351,20 @@
 "Supported formats" = "支持的格式";
 "Tap with three fingers to show the interface" = "三指点按以显示界面";
 "Technical Details" = "技术细节";
-"Tested by the Husk team on an iPhone." = "由 Husk 团队在 iPhone 上测试。";
+"Tested by the Stride team on an iPhone." = "由 Stride 团队在 iPhone 上测试。";
 "Thanks!" = "谢谢！";
 "The DeveloperTesting folder is empty." = "DeveloperTesting 文件夹是空的。";
 "The end of the log from the last time the game started. Share it when reporting a problem." = "游戏上次启动时日志的末尾。报告问题时请分享它。";
-"The game and everything it saved here are deleted from Husk." = "游戏及其在这里保存的所有内容都会从 Husk 中删除。";
-"The game is loaded in this session. Close Husk completely and open it again to reset its data." = "游戏已在本次运行中加载。请完全关闭 Husk 后重新打开，再重置它的数据。";
-"The game ran out of address space, not memory: iOS refused to set aside more addresses for it. An app without the extended virtual addressing entitlement gets only a few GB of addresses, and installs re-signed with your own Apple account or team often lose that entitlement. Install Husk with it kept, then start the game again." = "游戏耗尽的是地址空间，而不是内存：iOS 拒绝再为它预留地址。没有“扩展虚拟寻址”（extended virtual addressing）权限的应用只能使用几 GB 的地址，而用你自己的 Apple 账户或团队重新签名的安装常常会丢失这项权限。请以保留该权限的方式安装 Husk，然后重新启动游戏。";
+"The game and everything it saved here are deleted from Stride." = "游戏及其在这里保存的所有内容都会从 Stride 中删除。";
+"The game is loaded in this session. Close Stride completely and open it again to reset its data." = "游戏已在本次运行中加载。请完全关闭 Stride 后重新打开，再重置它的数据。";
+"The game ran out of address space, not memory: iOS refused to set aside more addresses for it. An app without the extended virtual addressing entitlement gets only a few GB of addresses, and installs re-signed with your own Apple account or team often lose that entitlement. Install Stride with it kept, then start the game again." = "游戏耗尽的是地址空间，而不是内存：iOS 拒绝再为它预留地址。没有“扩展虚拟寻址”（extended virtual addressing）权限的应用只能使用几 GB 的地址，而用你自己的 Apple 账户或团队重新签名的安装常常会丢失这项权限。请以保留该权限的方式安装 Stride，然后重新启动游戏。";
 "The game stopped" = "游戏已停止";
-"The pairing file stays in Husk's Documents folder and is only sent to Husk's own helper." = "配对文件保存在 Husk 的“文稿”文件夹中，只会发送给 Husk 自己的助手。";
-"The plan, in order, is docs/04-translation-layer.md in Husk's source." = "计划的先后顺序见 Husk 源码中的 docs/04-translation-layer.md。";
+"The pairing file stays in Stride's Documents folder and is only sent to Stride's own helper." = "配对文件保存在 Stride 的“文稿”文件夹中，只会发送给 Stride 自己的助手。";
+"The plan, in order, is docs/04-translation-layer.md in Stride's source." = "计划的先后顺序见 Stride 源码中的 docs/04-translation-layer.md。";
 "The report holds the full log of that run and which device and build it was on. Nothing is sent anywhere unless you share it." = "报告包含那次运行的完整日志，以及所用的设备和版本。除非你分享，否则不会发送到任何地方。";
 "Theme" = "主题";
-"This APK has no 64-bit code Husk can run, so it will probably not start." = "这个 APK 没有 Husk 能运行的 64 位代码，因此很可能无法启动。";
-"This build of Husk does not include the PS4 layer." = "此版本的 Husk 不包含 PS4 层。";
+"This APK has no 64-bit code Stride can run, so it will probably not start." = "这个 APK 没有 Stride 能运行的 64 位代码，因此很可能无法启动。";
+"This build of Stride does not include the PS4 layer." = "此版本的 Stride 不包含 PS4 层。";
 "This iPhone" = "这台 iPhone";
 "This was removed." = "已被移除。";
 "Tints buttons, switches and selected states throughout the app." = "为整个应用中的按钮、开关和选中状态着色。";
@@ -382,8 +382,8 @@
 "Updates" = "更新";
 "Use Guest Account" = "使用访客账户";
 "Use Guest Account (Aurora)" = "使用访客账户（Aurora）";
-"Use Husk while an app runs" = "应用运行时继续使用 Husk";
-"Use Husk while it starts" = "启动时继续使用 Husk";
+"Use Stride while an app runs" = "应用运行时继续使用 Stride";
+"Use Stride while it starts" = "启动时继续使用 Stride";
 "Use StikDebug" = "使用 StikDebug";
 "Use TrollStore" = "使用 TrollStore";
 "Use the jailbreak" = "使用越狱";
@@ -393,18 +393,18 @@
 "View" = "查看";
 "View Release" = "查看发布页";
 "Waiting for your %@…" = "正在等待你的 %@…";
-"Welcome to Husk" = "欢迎使用 Husk";
+"Welcome to Stride" = "欢迎使用 Stride";
 "What %@ has saved now is replaced by the backup. Back up first if you want to keep it." = "%@ 现在保存的内容会被备份替换。如果想保留，请先备份。";
-"What the game is called in Husk. The game itself is not changed." = "游戏在 Husk 中显示的名称。游戏本身不会被更改。";
+"What the game is called in Stride. The game itself is not changed." = "游戏在 Stride 中显示的名称。游戏本身不会被更改。";
 "What worked, what didn’t, how far you got" = "什么能用、什么不能用、你玩到了哪里";
-"What's New in Husk %@" = "Husk %@ 的新功能";
+"What's New in Stride %@" = "Stride %@ 的新功能";
 "Where it stands" = "目前状态";
 "Which saved machine?" = "哪台保存的机器？";
 "Width" = "宽度";
-"You can skip this: Husk asks again when a game needs it, and it is in Settings › JIT & Sideload." = "可以跳过：游戏需要时 Husk 会再次询问，也可以在“设置”›“JIT 与侧载”中找到。";
+"You can skip this: Stride asks again when a game needs it, and it is in Settings › JIT & Sideload." = "可以跳过：游戏需要时 Stride 会再次询问，也可以在“设置”›“JIT 与侧载”中找到。";
 "You have %@. The new version's IPA is on its release page." = "你的版本是 %@。新版本的 IPA 在它的发布页上。";
 "Your Games" = "你的游戏";
-"Your Husk log helps the developer see what went wrong. Only moderators can read it." = "你的 Husk 日志能帮助开发者找到问题。只有管理员可以查看。";
+"Your Stride log helps the developer see what went wrong. Only moderators can read it." = "你的 Stride 日志能帮助开发者找到问题。只有管理员可以查看。";
 "Your Name" = "你的名字";
 "Your profile, playtime and achievements, on this iPhone and on itslevii.dev." = "你的资料、游戏时长和成就，在这台 iPhone 和 itslevii.dev 上都能看到。";
 "ctrl" = "ctrl";
@@ -413,7 +413,7 @@
 "https://… or http://192.168.1.20:8642/" = "https://… 或 http://192.168.1.20:8642/";
 "or" = "或";
 "python3 serve-folder.py <folder>" = "python3 serve-folder.py <folder>";
-"serve-folder.py is in Husk's repository, under tools. The folder's contents land at the top of Shared Storage, so serve the folder that holds what a game expects there." = "serve-folder.py 位于 Husk 仓库的 tools 目录下。文件夹中的内容会放到“共享存储”的最顶层，所以请共享游戏期望在那里看到的文件夹。";
+"serve-folder.py is in Stride's repository, under tools. The folder's contents land at the top of Shared Storage, so serve the folder that holds what a game expects there." = "serve-folder.py 位于 Stride 仓库的 tools 目录下。文件夹中的内容会放到“共享存储”的最顶层，所以请共享游戏期望在那里看到的文件夹。";
 "starting" = "正在启动";
 
 /* Play app page */

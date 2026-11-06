@@ -310,7 +310,7 @@ struct CompatibilitySection: View {
                     .font(.footnote).foregroundStyle(.secondary)
             }
             Button { reporting = subject } label: { Label("Report How It Ran", systemImage: "square.and.pencil") }
-            Link(destination: compat.pageURL(subject.package)) { Label("Open on itslevii.dev", systemImage: "safari") }
+            Link(destination: compat.pageURL(subject.package)) { Label("Open compatibility page", systemImage: "safari") }
         } header: {
             Text("Compatibility")
         } footer: {
@@ -365,7 +365,7 @@ struct CompatReportSheet: View {
                 } header: {
                     Text("Your Name")
                 } footer: {
-                    Text("Sent with it: \(CompatibilityStore.device), iOS \(UIDevice.current.systemVersion), Stride build \(CompatibilityStore.build), \(JITLess.enabled ? "Play without JIT" : "JIT from \(CompatibilityStore.jitMethod)"). It shows on itslevii.dev for everyone.")
+                    Text("Sent with it: \(CompatibilityStore.device), iOS \(UIDevice.current.systemVersion), Stride build \(CompatibilityStore.build), \(JITLess.enabled ? "Play without JIT" : "JIT from \(CompatibilityStore.jitMethod)"). It appears on the online compatibility list.")
                 }
                 Section {
                     Toggle("Attach my log", isOn: $attachLog)

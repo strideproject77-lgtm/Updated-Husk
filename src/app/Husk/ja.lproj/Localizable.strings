@@ -1,13 +1,13 @@
-/* Husk, Japanese. Keys are the English text as written in the Swift sources. */
+/* Stride, Japanese. Keys are the English text as written in the Swift sources. */
 
-"%@ and more, running on your iPhone with Husk." = "%@ などを Husk を使ってあなたの iPhone でプレイ。";
+"%@ and more, running on your iPhone with Stride." = "%@ などを Stride を使ってあなたの iPhone でプレイ。";
 "%@ free on this device." = "このデバイスの空き容量: %@。";
-"%@ has been started in this run of Husk. Close Husk and open it again to restore saves." = "%@ はこの実行で既に起動されています。セーブデータを復元するには、Huskを一度閉じて再度開いてください。";
-"%@ is still loaded and only one game can run per session. Husk closes; open it again and %@ starts by itself." = "%1$@ はまだ読み込まれており、セッションごとに実行できるゲームは1つのみです。Huskを終了します。再度開くと %2$@ が自動的に起動します。";
+"%@ has been started in this run of Stride. Close Stride and open it again to restore saves." = "%@ はこの実行で既に起動されています。セーブデータを復元するには、Strideを一度閉じて再度開いてください。";
+"%@ is still loaded and only one game can run per session. Stride closes; open it again and %@ starts by itself." = "%1$@ はまだ読み込まれており、セッションごとに実行できるゲームは1つのみです。Strideを終了します。再度開くと %2$@ が自動的に起動します。";
 "%@ of %@" = "%1$@ / %2$@";
 "%@ opens by itself once Android has started." = "Androidが起動すると、%@ が自動的に開きます。";
-"%@ was started in this session, and a game cannot be unloaded once it has started. Close Husk completely and open it again to run %@." = "%1$@ はこのセッションで起動されました。一度起動したゲームはアンロードできません。%2$@ を実行するには、Huskを完全に終了して再度開いてください。";
-"%@ was started in this session. Close Husk completely and open it again to run %@." = "%1$@ はこのセッションで起動されました。%2$@ を実行するには、Huskを完全に終了して再度開いてください。";
+"%@ was started in this session, and a game cannot be unloaded once it has started. Close Stride completely and open it again to run %@." = "%1$@ はこのセッションで起動されました。一度起動したゲームはアンロードできません。%2$@ を実行するには、Strideを完全に終了して再度開いてください。";
+"%@ was started in this session. Close Stride completely and open it again to run %@." = "%1$@ はこのセッションで起動されました。%2$@ を実行するには、Strideを完全に終了して再度開いてください。";
 "%@, minimised" = "%@ (最小化)";
 "%lld" = "%lld";
 "%lld Downloading" = "%lld件 ダウンロード中";
@@ -17,8 +17,8 @@
 "%lld%%" = "%lld%%";
 "720" = "720";
 "1280" = "1280";
-"A backup is a .zip of everything %@ has saved in Husk, to keep in Files or move to another device." = "バックアップは、%@ が Husk 内に保存したすべてのデータを含む .zip ファイルです。「ファイル」に保存したり、別のデバイスに移動したりできます。";
-"A direct link to an APK, a bundle or a zip. It shows in Downloads, then Husk asks where it goes." = "APK、バンドル、または zip への直接リンク。「ダウンロード」に表示された後、Huskが配置場所を尋ねます。";
+"A backup is a .zip of everything %@ has saved in Stride, to keep in Files or move to another device." = "バックアップは、%@ が Stride 内に保存したすべてのデータを含む .zip ファイルです。「ファイル」に保存したり、別のデバイスに移動したりできます。";
+"A direct link to an APK, a bundle or a zip. It shows in Downloads, then Stride asks where it goes." = "APK、バンドル、または zip への直接リンク。「ダウンロード」に表示された後、Strideが配置場所を尋ねます。";
 "A few quick choices first. Everything here can be changed later in Settings." = "最初にいくつか簡単な設定を行います。ここでの設定は後から「設定」でいつでも変更できます。";
 "A new look, PS4 games, and hundreds more Android games." = "新しいデザイン、PS4ゲーム、そして何百ものAndroidゲームに対応。";
 "ANDROID" = "ANDROID";
@@ -34,7 +34,7 @@
 "Add a Game or App" = "ゲームまたはアプリを追加";
 "Add a game or app" = "ゲームまたはアプリを追加";
 "Add a link to an APK or a file, or the address a computer gives you when it shares a folder." = "APKやファイルのリンク、またはPCでフォルダを共有したときに表示されるアドレスを追加します。";
-"Add to Husk" = "Huskに追加";
+"Add to Stride" = "Strideに追加";
 "Add your first game" = "最初のゲームを追加";
 "After playing, once per game per update" = "プレイ後、ゲームのアップデートごとに1回";
 "An APK is added to your library when it finishes. Anything else goes into the Shared Storage folder, which games see as their phone storage." = "APKは完了するとライブラリに追加されます。それ以外のファイルは「共有ストレージ」フォルダに保存され、ゲームからは端末ストレージとして認識されます。";
@@ -42,7 +42,7 @@
 "Android App Info" = "Androidアプリ情報";
 "Android Emulator" = "Androidエミュレータ";
 "Android and PS4 games, on your iPhone." = "AndroidとPS4のゲームを、あなたのiPhoneで。";
-"Android and Translation Layer games need JIT. StikJIT, built into Husk, turns it on without a computer." = "AndroidおよびトランスレーションレイヤーのゲームにはJITが必要です。Husk内蔵のStikJITにより、PCなしで有効化できます。";
+"Android and Translation Layer games need JIT. StikJIT, built into Stride, turns it on without a computer." = "AndroidおよびトランスレーションレイヤーのゲームにはJITが必要です。Stride内蔵のStikJITにより、PCなしで有効化できます。";
 "Android installs it from where it already is — nothing is copied." = "Androidはコピーを行わず、元の場所から直接インストールします。";
 "Android will boot from cold once, then save a new one." = "Androidは一度コールドブートし、新しいスナップショットを保存します。";
 "Anonymous" = "匿名";
@@ -57,8 +57,8 @@
 "Attach the sound device" = "サウンドデバイスを接続";
 "Back" = "戻る";
 "Back Up Saves" = "セーブデータをバックアップ";
-"Back to Husk" = "Huskに戻る";
-"Boots the guest as soon as Husk opens, when JIT is available." = "JITが利用可能な場合、Huskを開くとすぐにゲストOSを起動します。";
+"Back to Stride" = "Strideに戻る";
+"Boots the guest as soon as Stride opens, when JIT is available." = "JITが利用可能な場合、Strideを開くとすぐにゲストOSを起動します。";
 "Both sides must be between 240 and 2560." = "縦横ともに240〜2560の間で指定してください。";
 "Browse Files" = "ファイルを参照";
 "Browse and download apps using an anonymous Aurora guest account, or sign in with your Google account." = "Auroraの匿名ゲストアカウントでアプリを参照・ダウンロードするか、Googleアカウントでサインインします。";
@@ -76,8 +76,8 @@
 "Clear" = "消去";
 "Clear Finished" = "完了分を消去";
 "Close" = "閉じる";
-"Close Husk" = "Huskを終了";
-"Close Husk?" = "Huskを終了しますか？";
+"Close Stride" = "Strideを終了";
+"Close Stride?" = "Strideを終了しますか？";
 "Compatibility" = "互換性";
 "Compatibility List" = "互換性リスト";
 "Connecting to Google Play…" = "Google Play に接続中…";
@@ -91,7 +91,7 @@
 "Could Not Load" = "読み込めませんでした";
 "Crash Report" = "クラッシュレポート";
 "Create Account" = "アカウントを作成";
-"Create a Husk Account" = "Huskアカウントを作成";
+"Create a Stride Account" = "Strideアカウントを作成";
 "Create an account" = "アカウントを作成";
 "Custom" = "カスタム";
 "Custom Colour" = "カスタムカラー";
@@ -117,8 +117,8 @@
 "Downloads" = "ダウンロード";
 "Drag a control to move it, or tap one to resize or hide it." = "コントロールをドラッグして移動、タップでサイズ変更または非表示にできます。";
 "Drop an APK file here" = "ここにAPKファイルをドロップ";
-"Each app is played once JIT is on, watched for 15 seconds, and written down; then Husk closes. Open Husk again for the next one. At the end the results file is offered to share." = "JITが有効になると各アプリが起動され、15秒間監視されて記録された後、Huskが終了します。次のアプリをテストするには再度Huskを開いてください。終了時に結果ファイルを共有できます。";
-"Each time Husk opens without JIT, it asks TrollStore to turn it on. TrollStore's URL Scheme setting must be on." = "JITなしでHuskを開くたびに、TrollStoreにJITの有効化をリクエストします。TrollStoreの「URL Scheme」設定が有効になっている必要があります。";
+"Each app is played once JIT is on, watched for 15 seconds, and written down; then Stride closes. Open Stride again for the next one. At the end the results file is offered to share." = "JITが有効になると各アプリが起動され、15秒間監視されて記録された後、Strideが終了します。次のアプリをテストするには再度Strideを開いてください。終了時に結果ファイルを共有できます。";
+"Each time Stride opens without JIT, it asks TrollStore to turn it on. TrollStore's URL Scheme setting must be on." = "JITなしでStrideを開くたびに、TrollStoreにJITの有効化をリクエストします。TrollStoreの「URL Scheme」設定が有効になっている必要があります。";
 "Edit Profile" = "プロフィールを編集";
 "Edit pad" = "パッドを編集";
 "Enable JIT" = "JITを有効化";
@@ -156,13 +156,13 @@
 "Home Screen" = "ホーム画面";
 "How did %@ run?" = "%@ の動作はどうでしたか？";
 "How does %@ run?" = "%@ の動作状況";
-"How each 64-bit library maps onto the iPhone: its relocations, the instructions Husk rewrites, and anything the loader works around." = "各64ビットライブラリがiPhoneにどのようにマッピングされるか（再配置、Huskが書き換える命令、ローダーによる回避処理など）。";
+"How each 64-bit library maps onto the iPhone: its relocations, the instructions Stride rewrites, and anything the loader works around." = "各64ビットライブラリがiPhoneにどのようにマッピングされるか（再配置、Strideが書き換える命令、ローダーによる回避処理など）。";
 "How it connects" = "接続方法";
 "How it works" = "仕組み";
-"Husk" = "Husk";
-"Husk %@" = "Husk %@";
-"Husk %@ Is Available" = "Husk %@ が利用可能です";
-"Husk was marked as debugged when it opened, so JIT is on." = "Huskの起動時にデバッグ対象として認識されたため、JITが有効になっています。";
+"Stride" = "Stride";
+"Stride %@" = "Stride %@";
+"Stride %@ Is Available" = "Stride %@ が利用可能です";
+"Stride was marked as debugged when it opened, so JIT is on." = "Strideの起動時にデバッグ対象として認識されたため、JITが有効になっています。";
 "I already have an account" = "アカウントを持っています";
 "Import" = "インポート";
 "Import APK" = "APKをインポート";
@@ -192,11 +192,11 @@
 "Last test: %lld of %lld done." = "前回のテスト: %1$lld / %2$lld 完了。";
 "Launch" = "起動";
 "Library" = "ライブラリ";
-"Live Activities are off for Husk, so downloads don't show on the Lock Screen or in the Dynamic Island. Turn them on in Settings › Husk › Live Activities." = "Huskのライブアクティビティが無効になっているため、ロック画面やDynamic Islandにダウンロードが表示されません。「設定」›「Husk」›「ライブアクティビティ」でオンにしてください。";
+"Live Activities are off for Stride, so downloads don't show on the Lock Screen or in the Dynamic Island. Turn them on in Settings › Stride › Live Activities." = "Strideのライブアクティビティが無効になっているため、ロック画面やDynamic Islandにダウンロードが表示されません。「設定」›「Stride」›「ライブアクティビティ」でオンにしてください。";
 "Loading Google Sign-In…" = "Google サインインを読み込み中…";
 "Log" = "ログ";
 "Logs" = "ログ";
-"Make a folder named DeveloperTesting in Husk's folder (Files > On My iPhone > Husk) and put the APKs to test in it: an APK each, or a folder per app with its base and split APKs." = "Huskのフォルダ（「ファイル」>「このiPhone内」>「Husk」）内に「DeveloperTesting」という名前のフォルダを作成し、テストするAPKを配置してください（アプリごとに単一のAPK、またはベースAPKと分割APKを含むフォルダ）。";
+"Make a folder named DeveloperTesting in Stride's folder (Files > On My iPhone > Stride) and put the APKs to test in it: an APK each, or a folder per app with its base and split APKs." = "Strideのフォルダ（「ファイル」>「このiPhone内」>「Stride」）内に「DeveloperTesting」という名前のフォルダを作成し、テストするAPKを配置してください（アプリごとに単一のAPK、またはベースAPKと分割APKを含むフォルダ）。";
 "Manage Repositories" = "リポジトリを管理";
 "Mass Test" = "一括テスト";
 "Menu" = "メニュー";
@@ -222,7 +222,7 @@
 "Not yet" = "まだありません";
 "Notes" = "メモ";
 "Nothing here is called “%@”." = "「%@」という名前の項目はありません。";
-"Nothing matches “%@”. Open Settings › About › Open Console to see what Husk is doing." = "「%@」に一致する項目はありません。「設定」›「情報」›「コンソールを開く」でHuskの動作を確認できます。";
+"Nothing matches “%@”. Open Settings › About › Open Console to see what Stride is doing." = "「%@」に一致する項目はありません。「設定」›「情報」›「コンソールを開く」でStrideの動作を確認できます。";
 "Now" = "今すぐ";
 "OK" = "OK";
 "On-screen controller" = "オンスクリーンコントローラー";
@@ -312,7 +312,7 @@
 "See All" = "すべて表示";
 "Select File" = "ファイルを選択";
 "Send" = "送信";
-"Sent with it: %@, iOS %@, Husk build %@, JIT from %@. It shows on itslevii.dev for everyone." = "送信される情報: %1$@、iOS %2$@、Huskビルド %3$@、JIT (%4$@)。itslevii.dev 上で全員に公開されます。";
+"Sent with it: %@, iOS %@, Stride build %@, JIT from %@. It shows on itslevii.dev for everyone." = "送信される情報: %1$@、iOS %2$@、Strideビルド %3$@、JIT (%4$@)。itslevii.dev 上で全員に公開されます。";
 "Set Up StikJIT Now" = "今すぐStikJITを設定";
 "Set up JIT" = "JITを設定";
 "Settings" = "設定";
@@ -327,7 +327,7 @@
 "Shows the window again" = "ウィンドウを再表示";
 "Sideloading" = "サイドロード";
 "Sign In" = "サインイン";
-"Sign In to Husk" = "Huskにサインイン";
+"Sign In to Stride" = "Strideにサインイン";
 "Sign In with Google" = "Googleでサインイン";
 "Sign Out" = "サインアウト";
 "Sign in with Google" = "Googleでサインイン";
@@ -339,7 +339,7 @@
 "Start Android to uninstall or look inside the app." = "アンインストールやアプリの内容を確認するにはAndroidを起動してください。";
 "Start Android?" = "Androidを起動しますか？";
 "Start Mass Test" = "一括テストを開始";
-"Start Using Husk" = "Huskを使い始める";
+"Start Using Stride" = "Strideを使い始める";
 "Start pairing" = "ペアリングを開始";
 "Starting %@…" = "%@ を起動中…";
 "Starting Android…" = "Androidを起動中…";
@@ -350,19 +350,19 @@
 "Supported formats" = "対応フォーマット";
 "Tap with three fingers to show the interface" = "3本指でタップしてインターフェースを表示";
 "Technical Details" = "技術的な詳細";
-"Tested by the Husk team on an iPhone." = "iPhone上でHuskチームによってテスト済み。";
+"Tested by the Stride team on an iPhone." = "iPhone上でStrideチームによってテスト済み。";
 "Thanks!" = "ありがとうございます！";
 "The DeveloperTesting folder is empty." = "DeveloperTesting フォルダは空です。";
 "The end of the log from the last time the game started. Share it when reporting a problem." = "ゲームが前回起動したときのログの末尾。問題を報告する際に共有してください。";
-"The game and everything it saved here are deleted from Husk." = "ゲームおよび保存されたすべてのデータがHuskから削除されます。";
-"The game is loaded in this session. Close Husk completely and open it again to reset its data." = "ゲームはこのセッションで読み込まれています。データをリセットするには、Huskを完全に終了して再度開いてください。";
+"The game and everything it saved here are deleted from Stride." = "ゲームおよび保存されたすべてのデータがStrideから削除されます。";
+"The game is loaded in this session. Close Stride completely and open it again to reset its data." = "ゲームはこのセッションで読み込まれています。データをリセットするには、Strideを完全に終了して再度開いてください。";
 "The game stopped" = "ゲームが停止しました";
-"The pairing file stays in Husk's Documents folder and is only sent to Husk's own helper." = "ペアリングファイルはHuskの書類フォルダ内に保持され、Husk自身のヘルパーにのみ送信されます。";
-"The plan, in order, is docs/04-translation-layer.md in Husk's source." = "今後の計画の順序はHuskソース内の docs/04-translation-layer.md に記載されています。";
+"The pairing file stays in Stride's Documents folder and is only sent to Stride's own helper." = "ペアリングファイルはStrideの書類フォルダ内に保持され、Stride自身のヘルパーにのみ送信されます。";
+"The plan, in order, is docs/04-translation-layer.md in Stride's source." = "今後の計画の順序はStrideソース内の docs/04-translation-layer.md に記載されています。";
 "The report holds the full log of that run and which device and build it was on. Nothing is sent anywhere unless you share it." = "レポートにはその実行の完全なログと使用したデバイス、ビルドが含まれます。共有しない限り外部に送信されることはありません。";
 "Theme" = "テーマ";
-"This APK has no 64-bit code Husk can run, so it will probably not start." = "このAPKにはHuskが実行可能な64ビットコードが含まれていないため、おそらく起動しません。";
-"This build of Husk does not include the PS4 layer." = "このHuskビルドにはPS4レイヤーが含まれていません。";
+"This APK has no 64-bit code Stride can run, so it will probably not start." = "このAPKにはStrideが実行可能な64ビットコードが含まれていないため、おそらく起動しません。";
+"This build of Stride does not include the PS4 layer." = "このStrideビルドにはPS4レイヤーが含まれていません。";
 "This iPhone" = "このiPhone";
 "This was removed." = "削除されました。";
 "Tints buttons, switches and selected states throughout the app." = "アプリ全体のボタン、スイッチ、選択状態に色を適用します。";
@@ -380,8 +380,8 @@
 "Updates" = "アップデート";
 "Use Guest Account" = "ゲストアカウントを使用";
 "Use Guest Account (Aurora)" = "ゲストアカウントを使用 (Aurora)";
-"Use Husk while an app runs" = "アプリの実行中もHuskを使用する";
-"Use Husk while it starts" = "起動中もHuskを使用する";
+"Use Stride while an app runs" = "アプリの実行中もStrideを使用する";
+"Use Stride while it starts" = "起動中もStrideを使用する";
 "Use StikDebug" = "StikDebug を使用";
 "Use TrollStore" = "TrollStore を使用";
 "Use the jailbreak" = "脱獄環境を使用";
@@ -391,18 +391,18 @@
 "View" = "表示";
 "View Release" = "リリースを表示";
 "Waiting for your %@…" = "%@ を待機中…";
-"Welcome to Husk" = "Huskへようこそ";
+"Welcome to Stride" = "Strideへようこそ";
 "What %@ has saved now is replaced by the backup. Back up first if you want to keep it." = "現在 %@ に保存されているデータはバックアップに置き換えられます。残したい場合は先にバックアップしてください。";
-"What the game is called in Husk. The game itself is not changed." = "Husk内でのゲームの表示名。ゲーム自体は変更されません。";
+"What the game is called in Stride. The game itself is not changed." = "Stride内でのゲームの表示名。ゲーム自体は変更されません。";
 "What worked, what didn’t, how far you got" = "動いた点、動かなかった点、どこまで進めたか";
-"What's New in Husk %@" = "Husk %@ の新機能";
+"What's New in Stride %@" = "Stride %@ の新機能";
 "Where it stands" = "現在のステータス";
 "Which saved machine?" = "どの保存された仮想マシンですか？";
 "Width" = "幅";
-"You can skip this: Husk asks again when a game needs it, and it is in Settings › JIT & Sideload." = "これはスキップできます: ゲームが必要とするときに再度確認され、「設定」›「JITとサイドロード」からも設定できます。";
+"You can skip this: Stride asks again when a game needs it, and it is in Settings › JIT & Sideload." = "これはスキップできます: ゲームが必要とするときに再度確認され、「設定」›「JITとサイドロード」からも設定できます。";
 "You have %@. The new version's IPA is on its release page." = "現在のバージョンは %@ です。新しいバージョンのIPAはリリース一覧ページにあります。";
 "Your Games" = "あなたのゲーム";
-"Your Husk log helps the developer see what went wrong. Only moderators can read it." = "Huskのログは開発者が問題の原因を特定するのに役立ちます。モデレーターのみが閲覧可能です。";
+"Your Stride log helps the developer see what went wrong. Only moderators can read it." = "Strideのログは開発者が問題の原因を特定するのに役立ちます。モデレーターのみが閲覧可能です。";
 "Your Name" = "あなたの名前";
 "Your profile, playtime and achievements, on this iPhone and on itslevii.dev." = "このiPhoneおよび itslevii.dev でのプロフィール、プレイ時間、実績。";
 "ctrl" = "ctrl";
@@ -411,7 +411,7 @@
 "https://… or http://192.168.1.20:8642/" = "https://… または http://192.168.1.20:8642/";
 "or" = "または";
 "python3 serve-folder.py <folder>" = "python3 serve-folder.py <folder>";
-"serve-folder.py is in Husk's repository, under tools. The folder's contents land at the top of Shared Storage, so serve the folder that holds what a game expects there." = "serve-folder.py はHuskリポジトリの tools ディレクトリにあります。フォルダの内容は「共有ストレージ」の最上位に配置されるため、ゲームがそこに期待するフォルダを提供してください。";
+"serve-folder.py is in Stride's repository, under tools. The folder's contents land at the top of Shared Storage, so serve the folder that holds what a game expects there." = "serve-folder.py はStrideリポジトリの tools ディレクトリにあります。フォルダの内容は「共有ストレージ」の最上位に配置されるため、ゲームがそこに期待するフォルダを提供してください。";
 "starting" = "起動中";
 
 /* Play app page */
