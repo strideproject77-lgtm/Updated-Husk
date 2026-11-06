@@ -38,6 +38,17 @@ fetch () {
 fetch epoxy https://github.com/utmapp/libepoxy.git   "$EPOXY_COMMIT"
 fetch virgl https://github.com/utmapp/virglrenderer.git "$VIRGL_COMMIT"
 
+# virglrenderer generates Gallium sources with Python scripts that import
+# PyYAML. Homebrew's Meson invokes the host python3 from the cross file; that
+# interpreter does not ship PyYAML, so provide it in an isolated build-local
+# directory without mutating the runner's Homebrew Python installation.
+PYTHON_DEPS="$GPU/python-deps"
+mkdir -p "$PYTHON_DEPS"
+if ! python3 -c 'import yaml' >/dev/null 2>&1; then
+    python3 -m pip install --disable-pip-version-check --quiet --target "$PYTHON_DEPS" PyYAML
+fi
+export PYTHONPATH="$PYTHON_DEPS${PYTHONPATH:+:$PYTHONPATH}"
+
 export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
 
 echo "==> libepoxy"
