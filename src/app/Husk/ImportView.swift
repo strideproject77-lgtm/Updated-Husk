@@ -47,7 +47,7 @@ struct ImportView: View {
                 }
                 Button("Cancel", role: .cancel) { link = "" }
             } message: {
-                Text("A direct link to an APK, a bundle or a zip. It shows in Downloads, then Husk asks where it goes.")
+                Text("A direct link to an APK, a bundle or a zip. It shows in Downloads, then Stride asks where it goes.")
             }
         }
     }

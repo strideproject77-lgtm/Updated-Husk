@@ -2,7 +2,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// APKs handed to Husk from another app: the share sheet's "Husk" (or "Copy to Husk"), or "Open in Husk" from Files.
+/// APKs handed to Husk from another app: the share sheet's "Stride" (or "Copy to Stride"), or "Open in Stride" from Files.
 ///
 /// Each arrives as a URL that may only be readable for a moment (a security-scoped file in another app's container, or a copy
 /// in Documents/Inbox that iOS made), so it is copied straight away to a folder of Husk's own, and then the person is asked
@@ -88,7 +88,7 @@ final class IncomingFiles: ObservableObject {
     /// it. Only fake packages (fPKG) and homebrew open; a retail package is refused with a message saying so.
     private func installPS4Packages(_ files: [URL]) {
         guard PS4Store.available, let module = PS4Store.moduleURL else {
-            AndroidHost.shared.say("Can't install PS4 games here", PS4Store.moduleURL == nil ? "This copy of Husk doesn't have the PS4 layer." : "PS4 games need iOS 17.4 or later.", good: false)
+            AndroidHost.shared.say("Can't install PS4 games here", PS4Store.moduleURL == nil ? "This copy of Stride doesn't have the PS4 layer." : "PS4 games need iOS 17.4 or later.", good: false)
             return
         }
         let progress = PackageProgress { [weak self] text in self?.preparing = text }
@@ -261,7 +261,7 @@ struct IncomingChooser: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Add to Husk").font(.title2.weight(.bold))
+                Text("Add to Stride").font(.title2.weight(.bold))
                 Text(title).font(.subheadline).foregroundStyle(.secondary).lineLimit(2)
             }
 
