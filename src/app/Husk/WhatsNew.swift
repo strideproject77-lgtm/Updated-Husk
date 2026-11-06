@@ -93,7 +93,7 @@ final class AppUpdates: ObservableObject {
 
     @Published var available: Release?
 
-    private static let api = URL(string: "https://api.github.com/repos/Leviidev/Stride/releases/latest")!
+    private static let api = URL(string: "https://api.github.com/repos/strideproject77-lgtm/Updated-Husk/releases/latest")!
     private static let checkedKey = "husk.updates.checked", dismissedKey = "husk.updates.dismissed"
 
     static var current: String { Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0" }

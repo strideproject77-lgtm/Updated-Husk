@@ -1,17 +1,13 @@
 {
   "name": "Stride",
-  "identifier": "dev.itslevii.source",
+  "identifier": "dev.strideproject77.source",
   "subtitle": "Experimental Android compatibility runtime for iPhone.",
   "description": "Stride is an experimental iOS project focused on running Android apps and games through a native translation layer. Compatibility is under active development; app inspection does not guarantee that an APK will launch. No public Stride IPA release is listed yet.",
   "iconURL": "https://raw.githubusercontent.com/strideproject77-lgtm/Updated-Husk/main/branding/stride-icon.svg",
-  "website": "https://itslevii.dev",
-  "tintColor": "#5865F2",
+  "website": "https://github.com/strideproject77-lgtm/Updated-Husk",
+  "tintColor": "#7435F5",
   "featuredApps": [
-    "com.husk.app",
-    "com.aether.ps4ios",
-    "com.utsuro.app",
-    "com.leviidev.podium",
-    "app.fathom.emulator"
+    "com.husk.app"
   ],
   "apps": [
     {
@@ -37,7 +33,7 @@
           "com.apple.developer.kernel.extended-virtual-addressing"
         ],
         "privacy": {
-          "NSLocalNetworkUsageDescription": "Husk uses the local network to pair with this iPhone for JIT, without a computer."
+          "NSLocalNetworkUsageDescription": "Stride uses the local network to pair with this iPhone for JIT, without a computer."
         }
       }
     }
