@@ -256,7 +256,7 @@ struct StoreView: View {
                     Text(shelf == .apps ? "Apps for\nevery day." : "Discover\nnew worlds.")
                         .font(.system(size: 28, weight: .bold)).foregroundStyle(.white)
                         .multilineTextAlignment(.leading)
-                    Text("\(app.title) and more, running on your iPhone with Husk.")
+                    Text("\(app.title) and more, running on your iPhone with Stride.")
                         .font(.system(size: 13)).foregroundStyle(.white.opacity(0.85))
                         .lineLimit(2).multilineTextAlignment(.leading)
                 }

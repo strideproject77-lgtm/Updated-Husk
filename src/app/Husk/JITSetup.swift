@@ -105,10 +105,10 @@ final class JITCoordinator: ObservableObject {
         var message: String {
             switch self {
             case .vpn:
-                return "Husk couldn't reach this device. Connect LocalDevVPN, then try again."
+                return "Stride couldn't reach this device. Connect LocalDevVPN, then try again."
             case .pairing:
                 return "This device closed the connection, which usually means it no longer accepts "
-                     + "Husk's pairing. Pair again, and check that LocalDevVPN is connected."
+                     + "Stride's pairing. Pair again, and check that LocalDevVPN is connected."
             }
         }
     }
@@ -146,10 +146,10 @@ final class JITCoordinator: ObservableObject {
 
     var automaticDescription: String {
         switch resolvedMethod {
-        case .stikDebug: return "StikDebug is installed, so Husk will open it."
-        case .trollStore: return "TrollStore is installed, so Husk will ask it to enable JIT."
+        case .stikDebug: return "StikDebug is installed, so Stride will open it."
+        case .trollStore: return "TrollStore is installed, so Stride will ask it to enable JIT."
         case .jailbreak: return "This device is jailbroken, so JIT comes from the jailbreak's Allow JIT in Apps setting."
-        default: return "StikDebug, TrollStore and a jailbreak were not found, so Husk will use its built-in helper."
+        default: return "StikDebug, TrollStore and a jailbreak were not found, so Stride will use its built-in helper."
         }
     }
 
@@ -216,12 +216,12 @@ final class JITCoordinator: ObservableObject {
             if JITBootstrap.requestTrollStoreAttach() {
                 awaitTrollStore()
             } else {
-                error = "TrollStore could not be opened. Install Husk through TrollStore, or choose another method."
+                error = "TrollStore could not be opened. Install Stride through TrollStore, or choose another method."
                 showSetup = true
             }
         case .jailbreak:
             // Nothing to ask: a jailbreak marks an app as debugged as it opens, if it has been told to. Say what to turn on.
-            error = "Turn on Allow JIT in Apps in Dopamine's settings, then open Husk again."
+            error = "Turn on Allow JIT in Apps in Dopamine's settings, then open Stride again."
             showSetup = true
         case .builtIn:
             guard HuskBuiltInJIT.isAvailable, hasPairing else {
@@ -250,7 +250,7 @@ final class JITCoordinator: ObservableObject {
                 log("TrollStore enabled JIT")
             } else {
                 status = nil
-                error = "TrollStore did not enable JIT. In TrollStore's Settings turn on URL Scheme, and make sure Husk was "
+                error = "TrollStore did not enable JIT. In TrollStore's Settings turn on URL Scheme, and make sure Stride was "
                       + "installed through TrollStore (or is signed with get-task-allow)."
                 log("TrollStore did not enable JIT within a minute")
                 showSetup = true
@@ -336,14 +336,14 @@ final class JITCoordinator: ObservableObject {
     func enableBuiltIn() {
         guard let pairing = builtInPairing() else { return }
         guard let script = JITBootstrap.scriptBase64 else {
-            error = "Husk's JIT script is missing from this installation. Reinstall Husk."
+            error = "Stride's JIT script is missing from this installation. Reinstall Stride."
             return
         }
 
         busy = true
         error = nil
         connectionProblem = nil
-        status = "Starting Husk's JIT helper…"
+        status = "Starting Stride's JIT helper…"
         log("enabling JIT with the built-in helper")
         var readiness: Timer?
         var finished = false

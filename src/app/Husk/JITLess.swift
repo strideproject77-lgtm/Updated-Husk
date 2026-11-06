@@ -67,7 +67,7 @@ enum JITLess {
         // store made with the same certificate and its whole chain (a store's .p12 holds the developer certificate alone).
         if !chainLoaded, let exe = Bundle.main.executablePath {
             chainLoaded = true
-            HuskLog.log("sign", "certificate chain from Husk's own signature: \(husk_codesign_chain_from_executable(exe)) certificates")
+            HuskLog.log("sign", "certificate chain from Stride's own signature: \(husk_codesign_chain_from_executable(exe)) certificates")
         }
         // The signer revision and the running app's bundle ID are part of the tag: libraries signed by an older signer, or
         // under another install's identifier (SideStore appends the team, a TrollStore/enterprise install may not), are signed again.
