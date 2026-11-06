@@ -38,7 +38,7 @@ jobs:
         with:
           targets: aarch64-apple-ios
 
-      - name: Build Husk native dependencies
+      - name: Build Stride native dependencies
         env:
           HUSK_SKIP_IPA_PACKAGE: "1"
         run: ./scripts/ci_build.sh
